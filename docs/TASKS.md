@@ -37,10 +37,10 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 
 ## SETUP-002 · Merkezi config + package/bundle id + flavors — todo
 - Amaç: `AppConfig` (uygulama adı "Miyhav", marka, env), dev/prod dart-define,
-  package name + bundle id kesinleştirme (P-001 onayı ile), `.env.example` bağlama.
-- Kabul: uygulama adı tek merkezden; package/bundle onaylı değere ayarlı.
-- Manuel: **Package name onayı** (kullanıcı).
-- Bağımlılık: SETUP-001, DECISIONS P-001.
+  package name + bundle id = `com.miyhav.app` (onaylandı, D-013), `.env.example` bağlama.
+- Kabul: uygulama adı tek merkezden; package/bundle `com.miyhav.app`.
+- Manuel: yok (package name onayı alındı).
+- Bağımlılık: SETUP-001.
 
 ## DESIGN-001 · Tasarım sistemi (tema) — todo
 - Amaç: AppColors/Typography/Spacing/Radius/Elevation; Jost fontu bundle; Material 3

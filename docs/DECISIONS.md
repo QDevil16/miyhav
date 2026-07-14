@@ -55,9 +55,9 @@ Production'da ihtiyaç olursa ayrı karar.
 MVP'de payment SDK yok. Merkezi entitlement service ile hazırlık (maxPets,
 canExportPdf, ...). Varsayılan free sınırsız pet. Gerekçe: şartname.
 
-## PENDING · P-001 · Package name / bundle id
-Öneri: `com.miyhav.app` (Android package = iOS bundle id). **Kullanıcı onayı
-bekleniyor** — SETUP-002'de kesinleşecek. Onaysız production kimliği sabitlenmez.
+## D-013 · Package name / bundle id (ONAYLANDI)
+`com.miyhav.app` (Android package = iOS bundle id). **Kullanıcı onayladı (2026-07-14).**
+SETUP-002'de bu değere sabitlenecek.
 
 ## Retention notu
 Şikâyet/moderasyon (reports, content_reports) verisi hesap silmede tamamen
