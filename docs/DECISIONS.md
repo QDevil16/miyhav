@@ -69,6 +69,19 @@ Dart/runtime seviyesinde (`AppConfig.displayTitle` dev'de "Miyhav (Dev)"). İler
 dev/prod'un cihazda yan yana kurulabilmesi gerekirse app-id suffix'li gradle flavor
 ayrı görevle eklenebilir.
 
+## D-015 · Jost fontu bundle yöntemi
+Google Fonts Jost variable font'undan `fonttools varLib.instancer` ile 4 statik
+ağırlık (400/500/600/700) üretilip `assets/fonts/`'a konuldu; `pubspec.yaml` ile
+tanımlandı. Gerekçe: çalışma zamanı font indirme yasak; statik ağırlıklar Flutter'da
+öngörülebilir render verir. Türkçe glyph kapsamı doğrulandı. Lisans (SIL OFL)
+`assets/fonts/Jost-OFL.txt` ile birlikte tutulur.
+
+## D-016 · Pixel-art pet asset sistemi
+Placeholder pet avatarları indirilmiş görsel yerine kod içi 12×12 özgün pixel
+desenlerinden `CustomPainter` ile çizilir (`PetPixelAvatar`). Gerekçe: telifsiz,
+özgün, ölçeklenebilir, ağ bağımlılığı yok. Gerçek foto yüklenene kadar kullanılır;
+yeni tür desenleri kolayca eklenir.
+
 ## Retention notu
 Şikâyet/moderasyon (reports, content_reports) verisi hesap silmede tamamen
 silinmeyebilir (kötüye kullanım önleme). Kesin retention politikası ilgili

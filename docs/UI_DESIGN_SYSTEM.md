@@ -71,3 +71,39 @@ yüklenene kadar kaliteli placeholder. Telifli/marka görseli kullanılmaz.
 Kullanıcı her zaman: nereye basacağını, hangi ekranda olduğunu, işlemin başarılı
 olup olmadığını, verinin yüklenip yüklenmediğini anlayabilmelidir (loading /
 empty / error / success durumları her ekranda ele alınır).
+
+---
+
+## Uygulama Durumu (DESIGN-001)
+Tasarım sistemi kodda hayata geçirildi. Tokenlar tek merkezden gelir; widget'larda
+magic number / ham HEX kullanılmaz.
+
+**Token dosyaları (`lib/core/theme/`):**
+- `app_colors.dart` — palet + açık/koyu `ColorScheme`.
+- `app_typography.dart` — Jost tabanlı ölçek (display/h1/h2/h3/body/caption) + `TextTheme`.
+- `app_spacing.dart` — 4 tabanlı boşluk ölçeği.
+- `app_radius.dart` — köşe yarıçapları + `BorderRadius` sabitleri.
+- `app_shadows.dart` — yumuşak kart/yükselti/buton gölgeleri.
+- `app_sizes.dart` — ikon ve avatar boyutları.
+- `app_theme.dart` — tokenlardan `AppTheme.light` / `AppTheme.dark`.
+
+**Font:** Jost gerçekten bundle edildi (`assets/fonts/Jost-{Regular,Medium,SemiBold,
+Bold}.ttf`), `pubspec.yaml` `fonts:` altında tanımlı. Çalışma zamanında indirilmez.
+Google Fonts variable font'undan `fonttools` ile statik ağırlıklar üretildi; Türkçe
+karakter kapsamı doğrulandı (ç ğ ı İ ö ş ü). Lisans: `assets/fonts/Jost-OFL.txt` (SIL OFL).
+
+**Reusable bileşenler (`lib/shared/widgets/`):**
+`app_button.dart` (PrimaryButton/SecondaryButton), `app_text_field.dart` (şifre
+göster/gizle dahil), `app_card.dart` (imza yuvarlatılmış yüzey + accent varyantı),
+`app_avatar.dart` (kullanıcı, baş harf/ikon), `pet_pixel_avatar.dart` (özgün
+pixel-art pet — aşağıya bak), `empty_state.dart`, `loading_state.dart`,
+`miyhav_app_bar.dart`, `miyhav_bottom_nav.dart` (özel yüzen pill navigasyon).
+
+**Alt navigasyon:** `MainShell` (`lib/app/main_shell.dart`) 5 geçici sekme —
+Ana Sayfa · Keşfet · Paylaş · Petlerim · Profil. Gerçek feature/backend YOK;
+sekmeler tasarım sistemini sergileyen geçici içerik gösterir.
+
+**Pet asset sistemi:** `PetPixelAvatar` — indirilmiş/telifli görsel YOK. 12×12
+özgün pixel desenleri koddan `CustomPainter` ile çizilir (cat/dog/bird/rabbit +
+jenerik "other" fallback; fish/reptile/other → other). Her tür kendi sıcak gövde
+tonunu kullanır. Yeni türler için desen eklenebilir.

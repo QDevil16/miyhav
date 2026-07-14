@@ -31,5 +31,17 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Varsayılan uygulama dili Türkçe; ileride İngilizce eklenecek.
-  # (Bundled fontlar ve asset'ler ilgili görevlerde eklenecek.)
+  # Bundled fontlar (çalışma zamanında indirilmez). Kaynak: Google Fonts / Jost
+  # (SIL OFL). Variable font'tan fonttools ile statik ağırlıklar üretildi.
+  # Lisans: assets/fonts/Jost-OFL.txt
+  fonts:
+    - family: Jost
+      fonts:
+        - asset: assets/fonts/Jost-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Jost-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Jost-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Jost-Bold.ttf
+          weight: 700

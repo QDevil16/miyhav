@@ -1,5 +1,27 @@
 # COMPLETED — Tamamlanan Görevler
 
+## DESIGN-001 · Tasarım sistemi (tema, font, bileşenler, alt navigasyon)
+- **Tarih:** 2026-07-14
+- **Özet:** Miyhav'ın özgün tasarım sistemi kuruldu. Token dosyaları
+  (`lib/core/theme/`): renk paleti + açık/koyu `ColorScheme` (kahve/kakao/taupe/krem
+  + soft coral), Jost tipografi ölçeği + `TextTheme`, spacing/radius/shadows/sizes,
+  ve `AppTheme.light`/`dark`. **Jost fontu gerçekten bundle edildi**
+  (`assets/fonts/Jost-*.ttf`, `pubspec.yaml`'da tanımlı; Google Fonts variable
+  font'undan fonttools ile üretildi; Türkçe glyph doğrulandı; SIL OFL lisansı dahil).
+  Reusable bileşenler (`lib/shared/widgets/`): PrimaryButton/SecondaryButton,
+  AppTextField (şifre göster/gizle), AppCard (accent varyantı), AppAvatar,
+  PetPixelAvatar (özgün pixel-art), EmptyState, LoadingState, MiyhavAppBar,
+  MiyhavBottomNav. `MainShell` 5 geçici sekmeyle alt navigasyon iskeleti (gerçek
+  feature/backend yok). Kök tema `MiyhavApp`'te bağlandı.
+- **Kararlar:** D-015 (font instancing), D-016 (pixel-art asset sistemi).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → **11 test All passed** (AppConfig, AppTheme, bileşenler,
+  pixel avatar render, navigasyon geçişi) ✅.
+- **Test borcu:** Canlı cihaz/emülatör görsel doğrulaması TD-001 kapsamında
+  (Android SDK erişimi yok); widget ağacı render'ı testlerle doğrulandı.
+- **Commit:** `feat: add Miyhav design system, Jost font and bottom nav skeleton`
+- **Durum:** done.
+
 ## SETUP-002 · Merkezi config + package/bundle id + dev/prod
 - **Tarih:** 2026-07-14
 - **Özet:** Merkezi `AppConfig` oluşturuldu (appName/brandName "Miyhav",

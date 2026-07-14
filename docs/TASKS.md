@@ -57,12 +57,23 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 - Bağımlılık: SETUP-001.
 - Durum: **done**.
 
-## DESIGN-001 · Tasarım sistemi (tema) — todo
-- Amaç: AppColors/Typography/Spacing/Radius/Elevation; Jost fontu bundle; Material 3
-  ColorScheme; birkaç çekirdek bileşen (Primary/Secondary button, Card, boş/hata/
-  yükleniyor durumları). Alt navigasyon iskeleti.
-- Kapsam dışı: gerçek feature ekranları.
+## DESIGN-001 · Tasarım sistemi (tema) — **done**
+- Amaç: AppColors/Typography/Spacing/Radius/Shadows/Sizes; Jost fontu bundle;
+  Material 3 açık/koyu tema; çekirdek bileşenler; özgün pixel-art pet asset sistemi;
+  alt navigasyon iskeleti.
+- Yapıldı: 7 token dosyası + AppTheme; Jost 4 statik ağırlık bundle (fonttools);
+  9 reusable widget (button/text field/card/avatar/pet pixel avatar/empty/loading/
+  app bar/bottom nav); `MainShell` 5 sekme; `PetPixelAvatar` (CustomPainter, 12×12).
+- Kapsam dışı (uygulanmadı): gerçek feature logic / backend / ekstra platform.
+- Kararlar: D-015 (font), D-016 (pixel-art).
+- Test yapıldı: `dart format` ✅ · `flutter analyze` (No issues) ✅ ·
+  `flutter test` → **11 test All passed** (tema, bileşenler, pixel avatar render,
+  navigasyon geçişi) ✅.
+- Test borcu: cihaz/emülatör üzerinde canlı görsel doğrulama TD-001 kapsamında
+  (Android SDK yok). Widget ağacında render doğrulandı.
+- Manuel: yok.
 - Bağımlılık: SETUP-001.
+- Durum: **done**.
 
 ## SETUP-003 · Supabase istemci bağlama + ilk migration altyapısı — todo
 - Amaç: supabase_flutter init; `supabase/` yapısı; boş/temel migration; bağlantı
@@ -149,5 +160,5 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**DESIGN-001** (tasarım sistemi: renk/tipografi/spacing + Jost fontu + çekirdek
-bileşenler). Ayrı ve onaylı bir adımda başlanacak; SETUP-002 burada durur.
+**SETUP-003** (Supabase istemci bağlama + ilk migration altyapısı: profiles tablosu
++ `handle_new_user` trigger). Ayrı ve onaylı bir adımda başlanacak; DESIGN-001 durur.

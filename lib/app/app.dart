@@ -5,12 +5,12 @@ import 'package:go_router/go_router.dart';
 
 import '../core/config/app_config.dart';
 import '../core/routing/app_router.dart';
+import '../core/theme/app_theme.dart';
 
 /// Uygulamanın kök widget'ı.
 ///
-/// Bu aşama yalnızca iskelet kurar: GoRouter tabanlı yönlendirme, Türkçe
-/// varsayılan dil ve geçici bir Material 3 tema. Tam tasarım sistemi (renkler,
-/// tipografi, bileşenler) DESIGN-001 görevinde eklenecektir.
+/// GoRouter tabanlı yönlendirme, Türkçe varsayılan dil ve Miyhav'ın özgün
+/// tasarım sistemi (AppTheme) burada bağlanır.
 class MiyhavApp extends ConsumerWidget {
   const MiyhavApp({super.key});
 
@@ -30,12 +30,8 @@ class MiyhavApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFD08D79), // Miyhav soft coral (geçici seed)
-        ),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
     );
   }
 }
