@@ -1,0 +1,35 @@
+name: miyhav
+description: "Miyhav - pet takip, sağlık ve sosyalleşme uygulaması"
+# Private paket: pub.dev'e yayınlanmaz.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State yönetimi ve bağımlılık enjeksiyonu
+  flutter_riverpod: ^2.6.1
+  # Deklaratif yönlendirme
+  go_router: ^14.6.2
+  # Yerelleştirme / tarih-sayı biçimlendirme
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Varsayılan uygulama dili Türkçe; ileride İngilizce eklenecek.
+  # (Bundled fontlar ve asset'ler ilgili görevlerde eklenecek.)

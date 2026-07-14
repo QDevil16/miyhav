@@ -1,5 +1,24 @@
 # COMPLETED — Tamamlanan Görevler
 
+## SETUP-001 · Flutter iskeleti (android + ios)
+- **Tarih:** 2026-07-14
+- **Özet:** `flutter create --platforms android,ios` ile proje oluşturuldu (yalnızca
+  android + ios; web/masaüstü yok). Feature-first klasör iskeleti kuruldu
+  (core/config, core/routing, core/theme, features/*, shared/*, l10n). `pubspec.yaml`
+  temel bağımlılıklarla güncellendi: flutter_riverpod, go_router, intl,
+  flutter_localizations. `MiyhavApp` (ConsumerWidget, MaterialApp.router, Türkçe
+  varsayılan locale, geçici Material 3 tema) + `ProviderScope` + minimal GoRouter
+  (geçici karşılama ekranı) eklendi. Varsayılan sayaç demo ve testi kaldırıldı.
+- **Ortam kurulumu:** Flutter 3.44.6 stable (Dart 3.12.2) kuruldu (repo dışında,
+  `/opt/flutter`).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → *All tests passed* ✅.
+- **Test borcu:** TD-001 — Android debug build. Android SDK yok ve `dl.google.com`
+  egress politikası ile engelli (403), gerçek `flutter build apk --debug`
+  koşulamadı. Ayrıntı ve kapatma adımları: `docs/TASKS.md` → Test Borcu.
+- **Commit:** `chore: scaffold Flutter app (android, ios) with Riverpod and GoRouter`
+- **Durum:** done (Android build test borcu ile).
+
 ## PLAN-001 · Planlama ve dokümantasyon
 - **Tarih:** 2026-07-14
 - **Özet:** Şartname ve referans tasarım analiz edildi. Özgün tasarım yönü, teknik

@@ -22,18 +22,21 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 - Manuel: Package name onayı (P-001) — SETUP-002 için beklemede.
 - Durum: **done**.
 
-## SETUP-001 · Flutter iskeleti (android+ios) — **todo** (SONRAKİ GÖREV)
+## SETUP-001 · Flutter iskeleti (android+ios) — **done**
 - Amaç: `flutter create --platforms android,ios`; klasör iskeleti (core/features/
   shared/l10n); temel `pubspec.yaml` (riverpod, go_router, intl, flutter_localizations);
   `MiyhavApp` + ProviderScope + boş router; `dart format`, `flutter analyze`,
   `flutter test` yeşil.
 - Kapsam dışı: Supabase/Firebase bağlama, feature ekranları, tema detayları.
-- Değişecek: proje kökü, `lib/`, `pubspec.yaml`, `analysis_options.yaml`.
+- Değişti: proje kökü, `lib/`, `pubspec.yaml`, `analysis_options.yaml`, `android/`,
+  `ios/`, `test/`.
 - SQL/RLS etkisi: yok.
-- Kabul: proje derlenir; analyze temiz; Android debug build alınır.
-- Test: `flutter analyze`, `flutter test` (varsayılan), Android debug build.
-- Manuel: yok (Flutter SDK ortamı gerekiyorsa eksiklik TASKS'e yazılır).
+- Kabul: proje derlenir; analyze temiz. **Android debug build — bkz. Test Borcu.**
+- Test yapıldı: `dart format` ✅, `flutter analyze` (No issues found) ✅,
+  `flutter test` (All tests passed) ✅.
+- Manuel: yok.
 - Bağımlılık: PLAN-001.
+- Durum: **done** (Android build test borcu ile).
 
 ## SETUP-002 · Merkezi config + package/bundle id + flavors — todo
 - Amaç: `AppConfig` (uygulama adı "Miyhav", marka, env), dev/prod dart-define,
@@ -123,9 +126,16 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 ---
 
 ## Test Borcu
-- Şu an yok. Ortam eksikliği (Docker/Supabase CLI/Flutter SDK) çıkarsa ilgili görevde
-  buraya yazılacak.
+- **TD-001 · Android debug build (SETUP-001):** Bu geliştirme ortamında Android SDK
+  yok ve `dl.google.com` organizasyon egress politikası ile engelli (403), bu yüzden
+  `sdkmanager`/`build-tools` indirilemiyor ve gerçek `flutter build apk --debug`
+  koşulamadı. Flutter iskeleti derlenebilir durumda (analyze + test yeşil); yalnızca
+  native APK derlemesi doğrulanamadı. **Nasıl kapatılır:** (a) Android SDK'nın
+  erişilebildiği bir ortam/CI (ör. Codemagic Android workflow) veya `dl.google.com`
+  izinli bir ağ; (b) `sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"`
+  kurulumu + lisans kabulü; (c) `flutter build apk --debug` çıktısının doğrulanması.
+  ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**SETUP-001** (Flutter iskeleti). Ayrı ve onaylı bir adımda başlanacak; bu planlama
-görevi burada durur.
+**SETUP-002** (merkezi config + package/bundle id `com.miyhav.app` + flavors). Ayrı ve
+onaylı bir adımda başlanacak; SETUP-001 burada durur.
