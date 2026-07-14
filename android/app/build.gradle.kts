@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.miyhav.miyhav"
+    namespace = "com.miyhav.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,10 +15,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.miyhav.miyhav"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // Kalıcı üretim kimliği (onaylandı: DECISIONS D-013).
+        applicationId = "com.miyhav.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

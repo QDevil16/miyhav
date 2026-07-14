@@ -38,12 +38,24 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 - Bağımlılık: PLAN-001.
 - Durum: **done** (Android build test borcu ile).
 
-## SETUP-002 · Merkezi config + package/bundle id + flavors — todo
+## SETUP-002 · Merkezi config + package/bundle id + flavors — **done**
 - Amaç: `AppConfig` (uygulama adı "Miyhav", marka, env), dev/prod dart-define,
-  package name + bundle id = `com.miyhav.app` (onaylandı, D-013), `.env.example` bağlama.
-- Kabul: uygulama adı tek merkezden; package/bundle `com.miyhav.app`.
-- Manuel: yok (package name onayı alındı).
+  package name + bundle id = `com.miyhav.app` (onaylandı, D-013).
+- Yapıldı: `lib/core/config/app_config.dart` (appName/brandName/applicationId,
+  AppFlavor enum, displayTitle, Supabase URL/anon key define'ları). Android
+  namespace + applicationId = `com.miyhav.app`, MainActivity `com.miyhav.app`
+  paketine taşındı, manifest label "Miyhav". iOS bundle id (+RunnerTests) =
+  `com.miyhav.app`, CFBundleName "Miyhav". `config/dev.json` + `config/prod.json`
+  (dart-define-from-file, secret yok) + `config/README.md`. `.gitignore`'a
+  `config/*.local.json`. `MiyhavApp` başlığı `AppConfig.displayTitle`.
+- Yaklaşım kararı: D-014 (dart-define; gradle/iOS flavor eklenmedi).
+- Test yapıldı: `dart format` ✅ · `flutter analyze` (No issues) ✅ ·
+  `flutter test` (4 test, AppConfig testleri dahil) ✅.
+- Test borcu: Android/iOS native build kimlik değişikliğinin derlenme doğrulaması
+  TD-001 kapsamında (SDK/erişim yok). iOS build yalnızca Codemagic'te doğrulanabilir.
+- Manuel: yok.
 - Bağımlılık: SETUP-001.
+- Durum: **done**.
 
 ## DESIGN-001 · Tasarım sistemi (tema) — todo
 - Amaç: AppColors/Typography/Spacing/Radius/Elevation; Jost fontu bundle; Material 3
@@ -137,5 +149,5 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**SETUP-002** (merkezi config + package/bundle id `com.miyhav.app` + flavors). Ayrı ve
-onaylı bir adımda başlanacak; SETUP-001 burada durur.
+**DESIGN-001** (tasarım sistemi: renk/tipografi/spacing + Jost fontu + çekirdek
+bileşenler). Ayrı ve onaylı bir adımda başlanacak; SETUP-002 burada durur.

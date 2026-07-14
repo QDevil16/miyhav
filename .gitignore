@@ -33,6 +33,8 @@ Thumbs.db
 secrets.json
 *.pem
 *.key
+# Yerel dart-define override'ları (gerçek değer içerebilir) depoya girmez
+config/*.local.json
 
 # --- Android ---
 android/.gradle/

@@ -1,4 +1,4 @@
-package com.miyhav.miyhav
+package com.miyhav.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,5 +1,24 @@
 # COMPLETED — Tamamlanan Görevler
 
+## SETUP-002 · Merkezi config + package/bundle id + dev/prod
+- **Tarih:** 2026-07-14
+- **Özet:** Merkezi `AppConfig` oluşturuldu (appName/brandName "Miyhav",
+  applicationId `com.miyhav.app`, `AppFlavor` enum, `displayTitle`, Supabase
+  URL/anon key için `--dart-define` okuma). Kalıcı kimlik her iki platformda
+  `com.miyhav.app` olarak uygulandı: Android namespace + applicationId, MainActivity
+  `com.miyhav.app` paketine taşındı, manifest label "Miyhav"; iOS bundle id
+  (+RunnerTests) ve CFBundleName güncellendi. Dev/prod için `config/dev.json` +
+  `config/prod.json` (dart-define-from-file, secret içermez) ve `config/README.md`
+  eklendi; `.gitignore`'a `config/*.local.json`. `MiyhavApp` başlığı
+  `AppConfig.displayTitle`'a bağlandı.
+- **Karar:** D-014 (dart-define tabanlı ortam; gradle/iOS flavor eklenmedi — basitlik).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → 4 test *All tests passed* (yeni AppConfig testleri dahil) ✅.
+- **Test borcu:** Native build kimlik doğrulaması TD-001 kapsamında (Android SDK yok;
+  iOS yalnızca Codemagic'te doğrulanır).
+- **Commit:** `chore: set com.miyhav.app id and add central AppConfig with dev/prod`
+- **Durum:** done.
+
 ## SETUP-001 · Flutter iskeleti (android + ios)
 - **Tarih:** 2026-07-14
 - **Özet:** `flutter create --platforms android,ios` ile proje oluşturuldu (yalnızca

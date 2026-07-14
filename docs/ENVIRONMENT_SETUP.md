@@ -17,10 +17,15 @@ account · Firebase Admin credentials · Cloudflare R2 secret · Apple private k
 Bunlar yalnızca sunucu (Edge Function / Supabase secret) veya CI (Codemagic
 environment variable group / secret) tarafında tutulur.
 
-## `.dart-define` Örnek Kullanım (dokümantasyon)
-- dev: `flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`
-- prod build: aynı anahtarlar production değerleriyle CI'da secret olarak verilir.
-- Gerçek değerler depoda yok; yalnızca `.env.example` örnek anahtar adlarını gösterir.
+## `--dart-define` Kullanımı (uygulandı: SETUP-002)
+Ortam değerleri `config/dev.json` ve `config/prod.json` içinden
+`--dart-define-from-file` ile verilir; `AppConfig` okur.
+- dev: `flutter run --dart-define-from-file=config/dev.json`
+- prod: `flutter build apk --release --dart-define-from-file=config/prod.json`
+- `config/*.json` yalnızca public değer taşır (APP_ENV + SETUP-003'te Supabase
+  URL/anon key). Yerel/gizli denemeler `config/*.local.json` (gitignored).
+- CI'da (Codemagic) değerler secret env olarak da geçilebilir.
+- Ayrıntı: `config/README.md`.
 
 ## `.env.example`
 Gerçek secret İÇERMEZ; yalnızca anahtar isimleri ve boş/örnek değerler. Depoya

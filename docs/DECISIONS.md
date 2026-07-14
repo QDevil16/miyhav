@@ -59,6 +59,16 @@ canExportPdf, ...). Varsayılan free sınırsız pet. Gerekçe: şartname.
 `com.miyhav.app` (Android package = iOS bundle id). **Kullanıcı onayladı (2026-07-14).**
 SETUP-002'de bu değere sabitlenecek.
 
+## D-014 · Dev/prod ortam yaklaşımı
+`--dart-define` / `--dart-define-from-file` (config/dev.json, config/prod.json) +
+merkezi `AppConfig` (AppFlavor enum). Android gradle product flavor'ları veya iOS
+scheme/xcconfig ayrımı MVP'de eklenmedi. Gerekçe: basit, sürdürülebilir,
+cross-platform aynı davranış, Windows'ta Xcode gerektirmez, `--flavor` zorunluluğu
+getirmez. Tek uygulama kimliği `com.miyhav.app` her iki platformda; ortam ayrımı
+Dart/runtime seviyesinde (`AppConfig.displayTitle` dev'de "Miyhav (Dev)"). İleride
+dev/prod'un cihazda yan yana kurulabilmesi gerekirse app-id suffix'li gradle flavor
+ayrı görevle eklenebilir.
+
 ## Retention notu
 Şikâyet/moderasyon (reports, content_reports) verisi hesap silmede tamamen
 silinmeyebilir (kötüye kullanım önleme). Kesin retention politikası ilgili
