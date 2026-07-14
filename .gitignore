@@ -1,0 +1,85 @@
+# ============================================================
+# Miyhav .gitignore  (Flutter + Android + iOS + Supabase + CI)
+# Secret ve credential dosyaları KESİNLİKLE depoya girmez.
+# ============================================================
+
+# --- Flutter / Dart ---
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/
+coverage/
+*.log
+doc/api/
+
+# --- IDE / Editör ---
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+Thumbs.db
+
+# --- Ortam / Secret ---
+.env
+.env.*
+!.env.example
+*.secrets
+secrets.json
+*.pem
+*.key
+
+# --- Android ---
+android/.gradle/
+android/captures/
+android/local.properties
+android/key.properties
+android/app/upload-keystore.jks
+android/app/*.keystore
+android/app/*.jks
+android/app/google-services.json
+**/GeneratedPluginRegistrant.*
+
+# --- iOS ---
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/flutter_export_environment.sh
+ios/Runner/GoogleService-Info.plist
+ios/**/*.mobileprovision
+ios/**/*.p12
+ios/**/*.p8
+ios/**/*.cer
+ios/**/*.certSigningRequest
+*.ipa
+
+# --- Apple / İmzalama (genel) ---
+*.p8
+*.p12
+*.mobileprovision
+AuthKey_*.p8
+
+# --- Supabase (yerel gizli/geçici) ---
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+**/supabase/.env
+
+# --- Firebase (yapılandırma; SETUP'ta karar) ---
+firebase-service-account*.json
+google-services.json
+GoogleService-Info.plist
+
+# --- Codemagic / CI (yerel) ---
+codemagic-local.env
+
+# --- Muhtelif geçici ---
+*.tmp
+*.bak
+*~

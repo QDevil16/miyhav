@@ -1,0 +1,131 @@
+# TASKS — Miyhav Görev Planı
+
+Görevler küçük, bağımsız ve test edilebilir. Aynı anda tek görev uygulanır; biten
+görevden sonra DUR. ~300 satırdan fazla yeni kod gerektiren görev alt görevlere
+bölünür. Durumlar: `todo` · `in_progress` · `done` · `blocked`.
+
+## Bağımlılık Sırası (özet)
+PLAN-001 → SETUP-001 → SETUP-002 → DESIGN-001 → SETUP-003 (Supabase bağlama) →
+AUTH-001..002 → PROFILE-001 → PRIVACY-001 → PET-001..002 → FRIEND-001..003 →
+DISCOVERY-001 → BLOCK-001 → SOCIAL-001..003 → HEALTH-001..003 → REMINDER-001 →
+NOTIFICATION-001..002 → PDF-001..002 → MEDIA-001 → SECURITY-001 → EMAIL-001 →
+ANDROID-001 → IOS-001 → RELEASE-001.
+
+---
+
+## PLAN-001 · Planlama ve dokümantasyon — **done**
+- Amaç: Şartname + referans analizi; mimari, DB, RLS, gizlilik, bildirim, PDF, iOS,
+  GitHub planı; tüm dokümanlar; görev listesi; git init + .gitignore + ilk commit.
+- Kapsam dışı: feature kodu, servis bağlama, migration uygulama.
+- Kabul: dokümanlar oluşturuldu; .gitignore + .env.example var; commit atıldı.
+- Test: yok (doküman görevi).
+- Manuel: Package name onayı (P-001) — SETUP-002 için beklemede.
+- Durum: **done**.
+
+## SETUP-001 · Flutter iskeleti (android+ios) — **todo** (SONRAKİ GÖREV)
+- Amaç: `flutter create --platforms android,ios`; klasör iskeleti (core/features/
+  shared/l10n); temel `pubspec.yaml` (riverpod, go_router, intl, flutter_localizations);
+  `MiyhavApp` + ProviderScope + boş router; `dart format`, `flutter analyze`,
+  `flutter test` yeşil.
+- Kapsam dışı: Supabase/Firebase bağlama, feature ekranları, tema detayları.
+- Değişecek: proje kökü, `lib/`, `pubspec.yaml`, `analysis_options.yaml`.
+- SQL/RLS etkisi: yok.
+- Kabul: proje derlenir; analyze temiz; Android debug build alınır.
+- Test: `flutter analyze`, `flutter test` (varsayılan), Android debug build.
+- Manuel: yok (Flutter SDK ortamı gerekiyorsa eksiklik TASKS'e yazılır).
+- Bağımlılık: PLAN-001.
+
+## SETUP-002 · Merkezi config + package/bundle id + flavors — todo
+- Amaç: `AppConfig` (uygulama adı "Miyhav", marka, env), dev/prod dart-define,
+  package name + bundle id kesinleştirme (P-001 onayı ile), `.env.example` bağlama.
+- Kabul: uygulama adı tek merkezden; package/bundle onaylı değere ayarlı.
+- Manuel: **Package name onayı** (kullanıcı).
+- Bağımlılık: SETUP-001, DECISIONS P-001.
+
+## DESIGN-001 · Tasarım sistemi (tema) — todo
+- Amaç: AppColors/Typography/Spacing/Radius/Elevation; Jost fontu bundle; Material 3
+  ColorScheme; birkaç çekirdek bileşen (Primary/Secondary button, Card, boş/hata/
+  yükleniyor durumları). Alt navigasyon iskeleti.
+- Kapsam dışı: gerçek feature ekranları.
+- Bağımlılık: SETUP-001.
+
+## SETUP-003 · Supabase istemci bağlama + ilk migration altyapısı — todo
+- Amaç: supabase_flutter init; `supabase/` yapısı; boş/temel migration; bağlantı
+  provider'ı; `handle_new_user` trigger + `profiles` tablosu ilk migration.
+- Manuel: Supabase projesi (URL + anon key) — kullanıcı.
+- Bağımlılık: SETUP-002.
+
+## AUTH-001 · Kayıt + e-posta doğrulama + giriş/çıkış — todo
+## AUTH-002 · Şifre sıfırlama/değiştirme + e-posta değiştirme + Türkçe hata — todo
+- Bağımlılık: SETUP-003.
+
+## PROFILE-001 · Profil görüntüleme/düzenleme + username uniqueness — todo
+- İçerik: profiles CRUD (kritik alanlar hariç), username_normalized unique, foto.
+- Bağımlılık: AUTH-001.
+
+## PRIVACY-001 · Profil gizliliği + public_profiles view/RPC — todo
+- İçerik: profile_visibility, güvenli projeksiyon, RLS politikaları.
+- Bağımlılık: PROFILE-001.
+
+## PET-001 · Pet ekleme/düzenleme/silme (özel alanlar) — todo
+## PET-002 · Sosyal pet görünümü (pet_public_view) — todo
+- Bağımlılık: PROFILE-001.
+
+## FRIEND-001 · friend_requests + gönder/iptal (RPC + constraint) — todo
+## FRIEND-002 · Kabul/ret + friendships (atomik RPC) — todo
+## FRIEND-003 · İlişki çözümleyici + istek/arkadaş listeleri — todo
+- Bağımlılık: PRIVACY-001.
+
+## DISCOVERY-001 · Arama + Keşfet (search/discover RPC) — todo
+- Bağımlılık: PRIVACY-001, FRIEND-003.
+
+## BLOCK-001 · Engelleme/engel kaldırma (atomik RPC) + filtreleme — todo
+- Bağımlılık: FRIEND-002, DISCOVERY-001.
+
+## SOCIAL-001 · Post oluştur/sil + akış (görünürlük birleşimi) — todo
+## SOCIAL-002 · Beğeni/beğeni kaldırma + yorum/yorum silme — todo
+## SOCIAL-003 · İçerik şikâyeti + moderation_status — todo
+- Bağımlılık: PET-002, BLOCK-001, MEDIA-001.
+
+## HEALTH-001 · health_records CRUD (RLS owner-only) — todo
+## HEALTH-002 · Kilo ölçümleri + sağlık geçmişi görünümü — todo
+## HEALTH-003 · health_attachments (private bucket + signed URL) — todo
+- Bağımlılık: PET-001.
+
+## REMINDER-001 · Periyot/next_due_date domain service (saf, testli) — todo
+- İçerik: kapsamlı unit testler (ay sonları, Şubat, artık yıl, ofsetler).
+- Bağımlılık: HEALTH-001.
+
+## NOTIFICATION-001 · device_tokens + FCM entegrasyon (client) — todo
+## NOTIFICATION-002 · Cron + Edge Function send-due-reminders (idempotent) — todo
+- Manuel: FCM projesi — kullanıcı.
+- Bağımlılık: REMINDER-001.
+
+## PDF-001 · Sağlık karnesi PDF oluşturma/ön izleme — todo
+## PDF-002 · PDF ayarları (mikroçip/sahip adı) + paylaş/kaydet/yazdır — todo
+- Bağımlılık: HEALTH-002.
+
+## MEDIA-001 · MediaStorageRepository + Supabase impl (upload/sıkıştırma/thumbnail) — todo
+- Bağımlılık: SETUP-003.
+
+## SECURITY-001 · RLS test paketi (Supabase CLI/Docker) — todo
+- İçerik: TEST_STRATEGY zorunlu senaryoları gerçek çalıştırma.
+- Bağımlılık: BLOCK-001, HEALTH-001.
+
+## EMAIL-001 · Türkçe Auth e-posta şablonları — todo
+- (EMAIL-002 Resend production — ertelendi.)
+
+## ANDROID-001 · Android release yapılandırma + ikon/splash — todo
+## IOS-001 · codemagic.yaml + iOS cloud build/signing — todo
+## RELEASE-001 · Mağaza dokümanları + Data Safety/App Privacy + yayın hazırlığı — todo
+- Manuel: Apple/Google/Codemagic hesap işlemleri — kullanıcı.
+
+---
+
+## Test Borcu
+- Şu an yok. Ortam eksikliği (Docker/Supabase CLI/Flutter SDK) çıkarsa ilgili görevde
+  buraya yazılacak.
+
+## Sonraki Görev
+**SETUP-001** (Flutter iskeleti). Ayrı ve onaylı bir adımda başlanacak; bu planlama
+görevi burada durur.
