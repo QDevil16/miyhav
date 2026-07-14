@@ -15,9 +15,19 @@ Riverpod + GoRouter. Gerekçe: güncel, bakımı süren, deklaratif, test edileb
 Supabase tek ana backend (Postgres/Auth/Storage/Realtime/Edge/Cron/RLS). Firebase
 yalnızca FCM push. Gerekçe: servis sayısını sade tutma; şartname.
 
-## D-004 · Enum stratejisi
-MVP'de `text` + `check` constraint (Postgres enum yerine). Gerekçe: migration ile
-kolay genişleme, daha az kilitlenme; ihtiyaç olursa enum'a geçilir.
+## D-004 · Enum stratejisi (rafine edildi — SETUP-003)
+Kolon bazında karar: `profiles`'ın kapalı ve durağan kümeleri
+(`profile_visibility`, `membership_type`, `account_status`) için **native Postgres
+enum** kullanıldı (tip güvenliği; gerektiğinde `ALTER TYPE ADD VALUE` ile genişler).
+Daha oynak/uzun kümeler (ör. `pets.species`, `health_records.record_type`) için
+`text` + `check` tercih edilebilir. Gerekçe: en güvenli + duruma uygun seçim.
+
+## D-017 · profiles kritik alan değişmezliği
+`membership_type`, `account_status`, `id`, `created_at` normal kullanıcı update'inde
+BEFORE UPDATE trigger (`profiles_before_update`) ile eski değerine sabitlenir;
+`username_normalized` generated kolon (doğrudan set edilemez). Profil INSERT'i
+authenticated'a açılmaz — yalnızca `handle_new_user` trigger'ı oluşturur. Üyelik/
+durum değişimleri ileride ayrı güvenli SECURITY DEFINER RPC'lerle yapılacaktır.
 
 ## D-005 · Arama/keşif projeksiyonu
 SECURITY INVOKER view (`public_profiles`) + SECURITY INVOKER RPC (`search_profiles`,

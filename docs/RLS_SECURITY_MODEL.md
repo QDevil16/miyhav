@@ -21,12 +21,14 @@ hesap aktif ∧ moderasyon durumu.
 ## profiles
 - **select (tam profil):** kendi kaydı; VEYA (hedef aktif ∧ engel yok ∧
   (public VEYA (friends_only ∧ are_friends))). private → yalnızca sahibi.
-- **insert:** yalnızca `id = auth.uid()` (trigger zaten oluşturur; savunma katmanı).
-- **update:** yalnızca `id = auth.uid()` VE `membership_type`/`account_status`
-  değiştirilemez. Bunu garanti için: bu iki kolon client update grant'inden çıkarılır
-  (kolon-seviyesi privilege) ve/veya `WITH CHECK` + trigger ile eski değere sabitlenir.
-  Değişim yalnızca güvenli RPC/Edge Function ile.
-- **delete:** doğrudan yok; hesap silme RPC/Edge Function ile.
+- **insert:** authenticated'a **policy verilmez → deny** (uygulanan: SETUP-003).
+  Profil yalnızca `handle_new_user` trigger'ı (SECURITY DEFINER) ile oluşur; bu,
+  membership/status enjeksiyonu vektörünü de kapatır.
+- **update:** yalnızca `id = auth.uid()`. `membership_type`/`account_status`/`id`/
+  `created_at` değişmezliği **BEFORE UPDATE trigger** (`profiles_before_update`) ile
+  eski değere sabitlenerek garanti edilir; `username_normalized` generated kolon.
+  Üyelik/durum değişimi yalnızca ileride güvenli RPC/Edge Function ile.
+- **delete:** authenticated'a policy verilmez; hesap silme RPC/Edge Function ile.
 
 ## Arama & Keşif Projeksiyonu (güvenli)
 Karar: **security invoker view + RPC**.

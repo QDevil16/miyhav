@@ -41,3 +41,37 @@ Supabase yerel gizli dosyaları, IDE/OS geçici dosyaları.
 Supabase projesi oluşturma → URL + anon key alma; FCM projesi; Codemagic env
 grupları; Apple/Google hesap işlemleri. Bu değerler geldikçe güvenli şekilde
 (dart-define / CI secret) bağlanır; koda yazılmaz.
+
+---
+
+## Supabase Projesi Oluşturma (kodlama bilmeyenler için)
+Aşağıdaki adımlar bir kez yapılır. Sonuçta bize **iki değer** lazım:
+**Project URL** ve **anon (public) key**. Bunlar gizli sır değildir; uygulamada
+bulunabilir. (Service role / secret anahtarı ASLA vermeyin, kullanılmaz.)
+
+1. Tarayıcıda **https://supabase.com** adresine gidin, **Sign in** ile giriş yapın
+   (GitHub hesabıyla giriş en kolayı). Hesabınız yoksa ücretsiz oluşturun.
+2. Açılan panelde yeşil **New project** düğmesine basın.
+3. Formu doldurun:
+   - **Name:** Miyhav
+   - **Database Password:** Güçlü bir şifre girin ve bir yere **kaydedin**
+     (bu şifreyi uygulamaya yazmayacağız; yalnızca sizin için).
+   - **Region:** Size en yakın bölge (ör. Frankfurt / EU Central).
+4. **Create new project** deyin. Kurulum 1–2 dakika sürebilir; bekleyin.
+5. Sol menüde **Settings** (dişli ikon) → **API** bölümüne girin.
+6. Şu iki değeri kopyalayın:
+   - **Project URL** (ör. `https://xxxx.supabase.co`)
+   - **anon public** anahtarı (Project API keys altında; "anon" yazan uzun metin).
+7. Bu iki değeri bana iletin **veya** `config/dev.json` dosyasındaki
+   `SUPABASE_URL` ve `SUPABASE_ANON_KEY` alanlarına yapıştırın. (Gerçek değerleri
+   GitHub'a göndermiyoruz; yerelde denemek için `config/dev.local.json` da
+   kullanılabilir — bu dosya depoya girmez.)
+
+**Başarı kontrolü:** Değerler girildikten sonra uygulama açılışta "Kurulum
+gerekli" ekranı yerine ana ekranı gösterirse bağlantı hazırdır. Değerler eksikse
+uygulama çökmez; anlaşılır bir kurulum ekranı gösterir.
+
+> Not: Bu görevde (SETUP-003) yalnızca istemci altyapısı ve `profiles` migration'ı
+> hazırlandı. Migration'ın Supabase projesine uygulanması (Supabase CLI ile
+> `supabase db push` veya SQL editöründen çalıştırma) ayrı bir adımdır ve gerçek
+> proje bağlandıktan sonra yapılır.

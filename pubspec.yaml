@@ -16,6 +16,8 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
+  # Backend istemcisi (Postgres/Auth/Storage/Realtime)
+  supabase_flutter: ^2.8.0
   # State yönetimi ve bağımlılık enjeksiyonu
   flutter_riverpod: ^2.6.1
   # Deklaratif yönlendirme

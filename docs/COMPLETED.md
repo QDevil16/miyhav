@@ -1,5 +1,33 @@
 # COMPLETED — Tamamlanan Görevler
 
+## SETUP-003 · Supabase istemci + ilk profiles migration
+- **Tarih:** 2026-07-14
+- **Özet:** `supabase_flutter` (2.16.0) eklendi. Merkezi, test edilebilir
+  `SupabaseBootstrap.initialize()` — `AppConfig` URL/anon key kullanır, ham hata
+  fırlatmaz, `SupabaseStatus{ready,missingConfig,error}` döner; `supabaseClientProvider`
+  data katmanı için. Eksik/hatalı config'te kontrollü `SupabaseStatusScreen`
+  (geliştirmede kurulum ipucu, üretimde sade mesaj). İlk migration
+  `20260714093000_create_profiles.sql`: `profiles` (id = auth.users.id), enum'lar
+  (profile_visibility/membership_type/account_status), generated `username_normalized`
+  + case-insensitive unique index, format/uzunluk check'leri, `handle_new_user`
+  (SECURITY DEFINER + `search_path=''`, idempotent `on conflict do nothing`,
+  metadata'dan yalnızca display_name — güvenli), `profiles_before_update` (kritik
+  alan değişmezliği + updated_at), deny-by-default RLS (yalnızca kendi profilini
+  oku/güncelle; insert/delete kapalı). Kodlama bilmeyenler için Supabase kurulum
+  adımları ENVIRONMENT_SETUP.md'ye eklendi.
+- **Kararlar:** D-004 (enum stratejisi rafine), D-017 (kritik alan değişmezliği).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → **14 test All passed** ✅. **Migration + RLS gerçek PostgreSQL
+  16'da koşuldu** (yerel sunucu + Supabase benzeri auth shim): 6 RLS senaryosu
+  (varsayılanlar, kendi/başka profil okuma, kritik alan değişmezliği, başkasını
+  güncelleyememe, insert deny, case-insensitive username benzersizliği) TÜMÜ GEÇTİ.
+- **Not:** Testler tam Supabase yerine yerel PG 16 + minimal auth shim (`auth.uid()`,
+  `authenticated` rolü) ile koştu; migration SQL'i gerçek ve davranış doğrulandı.
+  Gerçek Supabase projesine uygulanması kullanıcı projeyi bağladıktan sonra
+  (`supabase db push` / SQL editörü) yapılacak.
+- **Commit:** `feat: add Supabase client bootstrap and profiles migration with RLS`
+- **Durum:** done.
+
 ## DESIGN-001 · Tasarım sistemi (tema, font, bileşenler, alt navigasyon)
 - **Tarih:** 2026-07-14
 - **Özet:** Miyhav'ın özgün tasarım sistemi kuruldu. Token dosyaları

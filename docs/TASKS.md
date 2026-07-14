@@ -75,11 +75,24 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 - Bağımlılık: SETUP-001.
 - Durum: **done**.
 
-## SETUP-003 · Supabase istemci bağlama + ilk migration altyapısı — todo
-- Amaç: supabase_flutter init; `supabase/` yapısı; boş/temel migration; bağlantı
-  provider'ı; `handle_new_user` trigger + `profiles` tablosu ilk migration.
-- Manuel: Supabase projesi (URL + anon key) — kullanıcı.
+## SETUP-003 · Supabase istemci bağlama + ilk migration altyapısı — **done**
+- Amaç: supabase_flutter init; `supabase/` yapısı; ilk migration; bağlantı
+  provider'ı; `handle_new_user` trigger + `profiles` tablosu.
+- Yapıldı: `supabase_flutter ^2.8.0` (2.16.0 çözüldü). Merkezi
+  `SupabaseBootstrap.initialize()` (AppConfig URL/anon key; ham hata fırlatmaz →
+  `SupabaseStatus` döner) + `supabaseClientProvider`. Eksik config'te kontrollü
+  `SupabaseStatusScreen` (dev'de kurulum ipucu). Migration
+  `supabase/migrations/20260714093000_create_profiles.sql`: profiles + 3 enum +
+  generated `username_normalized` + unique index + check'ler + `handle_new_user`
+  (SECURITY DEFINER, idempotent, metadata'ya güvenmez) + `profiles_before_update`
+  (kritik alan değişmezliği) + deny-by-default RLS (select/update own).
+- Test yapıldı: `dart format` ✅ · `flutter analyze` (No issues) ✅ ·
+  `flutter test` → **14 test** (bootstrap missingConfig/error dahil) ✅.
+  **Migration + RLS gerçek Postgres 16'da koşuldu** (auth shim ile):
+  `supabase/tests/profiles_rls_test.sql` → 6 senaryo TÜMÜ GEÇTİ.
+- Manuel: Supabase projesi (URL + anon key) — kullanıcı (bkz. ENVIRONMENT_SETUP.md).
 - Bağımlılık: SETUP-002.
+- Durum: **done**.
 
 ## AUTH-001 · Kayıt + e-posta doğrulama + giriş/çıkış — todo
 ## AUTH-002 · Şifre sıfırlama/değiştirme + e-posta değiştirme + Türkçe hata — todo
@@ -160,5 +173,5 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**SETUP-003** (Supabase istemci bağlama + ilk migration altyapısı: profiles tablosu
-+ `handle_new_user` trigger). Ayrı ve onaylı bir adımda başlanacak; DESIGN-001 durur.
+**AUTH-001** (kayıt + e-posta doğrulama + giriş/çıkış). Ayrı ve onaylı bir adımda
+başlanacak; SETUP-003 burada durur.
