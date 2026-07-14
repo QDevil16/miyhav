@@ -162,6 +162,20 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 ---
 
 ## Test Borcu
+- **OPS-001 · Uzak migration history baseline (SETUP-003 canlı):** Migration
+  `20260714093000_create_profiles` uzak development DB'sine **SQL Editor**
+  üzerinden uygulandı; bu yüzden `supabase_migrations.schema_migrations`
+  history'si bu sürümü **içermiyor** (yerel migrations ↔ uzak history uyumsuz).
+  Bu ortamın egress politikası `*.supabase.co`'yu engellediğinden CLI baseline'ı
+  burada yapılamıyor. **Nasıl kapatılır:** (a) SALT OKUNUR ön doğrulama —
+  `supabase/checks/verify_remote_profiles.sql` SQL Editor'da koşulur, Bölüm 1'in
+  tüm satırları `OK`; (b) CLI erişimi olan makinede `supabase link --project-ref
+  ckocodjkvwzqyyilbqli` → `supabase migration repair --status applied
+  20260714093000` → `supabase migration list` (Local+Remote senkron) →
+  (opsiyonel) `supabase db diff` (fark yok). **Kapatma koşulu:** `migration list`
+  çıktısında sürüm hem Local hem Remote'ta görünür ve `db diff` fark üretmez.
+  Ayrıntılı plan: `docs/SUPABASE_MIGRATION_BASELINE.md`. **Kural:** repair
+  yapılmadan `supabase db push` çalıştırılmaz.
 - **TD-001 · Android debug build (SETUP-001):** Bu geliştirme ortamında Android SDK
   yok ve `dl.google.com` organizasyon egress politikası ile engelli (403), bu yüzden
   `sdkmanager`/`build-tools` indirilemiyor ve gerçek `flutter build apk --debug`
