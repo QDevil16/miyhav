@@ -10,6 +10,8 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/auth/presentation/verify_email_screen.dart';
+import '../../features/pet/domain/pet.dart';
+import '../../features/pet/presentation/pet_form_screen.dart';
 import '../../features/profile/presentation/profile_edit_screen.dart';
 import 'auth_router_state.dart';
 
@@ -22,6 +24,7 @@ abstract final class AppRoutes {
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
   static const String profileEdit = '/profile-edit';
+  static const String petForm = '/pet-form';
 
   /// Oturum açmamış kullanıcıya izin verilen yollar. (reset-password yalnızca
   /// şifre kurtarma modunda erişilebilir; burada yer almaz.)
@@ -113,6 +116,12 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((ref) {
         name: 'profileEdit',
         builder: (BuildContext context, GoRouterState state) =>
             const ProfileEditScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.petForm,
+        name: 'petForm',
+        builder: (BuildContext context, GoRouterState state) =>
+            PetFormScreen(pet: state.extra as Pet?),
       ),
     ],
   );

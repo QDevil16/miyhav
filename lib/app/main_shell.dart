@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../features/pet/presentation/pets_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../shared/widgets/app_card.dart';
 import '../shared/widgets/empty_state.dart';
@@ -69,12 +70,7 @@ class _MainShellState extends State<MainShell> {
           icon: Icons.add_a_photo_rounded,
         );
       case 3:
-        return const EmptyState(
-          title: 'Henüz pet eklemedin',
-          message: 'İlk pet dostunu ekleyerek başla.',
-          icon: Icons.pets_rounded,
-          actionLabel: 'Pet Ekle',
-        );
+        return const PetsScreen();
       default:
         return const ProfileScreen();
     }

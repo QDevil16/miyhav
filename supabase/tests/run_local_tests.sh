@@ -19,8 +19,10 @@ psql -d "$DB" -v ON_ERROR_STOP=1 \
   -f "$HERE/_shim_local.sql" \
   -f "$SUPA_DIR/migrations/20260714093000_create_profiles.sql" \
   -f "$SUPA_DIR/migrations/20260715120000_privacy_discovery.sql" \
+  -f "$SUPA_DIR/migrations/20260715140000_create_pets.sql" \
   -f "$HERE/profiles_rls_test.sql" \
-  -f "$HERE/privacy_rls_test.sql"
+  -f "$HERE/privacy_rls_test.sql" \
+  -f "$HERE/pets_rls_test.sql"
 
 dropdb "$DB"
 echo "OK: tüm yerel RLS testleri geçti"

@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:miyhav/app/app.dart';
 import 'package:miyhav/features/auth/application/auth_providers.dart';
 import 'package:miyhav/features/auth/data/auth_repository.dart';
+import 'package:miyhav/features/pet/application/pet_providers.dart';
+import 'package:miyhav/features/pet/domain/pet.dart';
 
 import 'support/fake_auth_repository.dart';
 
@@ -20,7 +22,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: <Override>[authRepositoryProvider.overrideWithValue(auth)],
+        overrides: <Override>[
+          authRepositoryProvider.overrideWithValue(auth),
+          myPetsProvider.overrideWith((ref) async => <Pet>[]),
+        ],
         child: const MiyhavApp(),
       ),
     );

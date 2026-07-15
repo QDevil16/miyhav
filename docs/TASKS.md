@@ -208,12 +208,39 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   case-insensitive unique, friends_only tam profil deny). Flutter: `dart format` ✅ ·
   `flutter analyze` (No issues) ✅ · `flutter test` → **68 test** ✅ (DiscoveryProfile
   parse dahil).
-- Manuel: Yeni migration'ın gerçek Supabase'e uygulanması → bkz. OPS-005 (OPS-001
-  baseline'a bağlı).
+- **Canlı doğrulama (2026-07-15):** `20260715120000_privacy_discovery.sql` gerçek
+  Supabase development projesine SQL Editor ile uygulandı ve doğrulandı: `public_profiles`
+  view + `search_profiles` fn + `is_account_active` fn + `profiles_select_public`
+  policy mevcut; profiles'ta RLS açık. (Wildcard kaçırma düzeltmesi `7016215`.)
+  Migration history baseline OPS-001'de (iki sürüm birlikte).
+- Manuel: yok (uygulandı). Kalan yalnızca migration history baseline → OPS-001.
 - Bağımlılık: PROFILE-001.
-- Durum: **done** (canlı Supabase'e uygulama OPS-005'te).
+- Durum: **done** (canlı doğrulandı).
 
-## PET-001 · Pet ekleme/düzenleme/silme (özel alanlar) — todo
+## PET-001 · Pet ekleme/düzenleme/silme (özel alanlar) — **done**
+- Amaç: Kullanıcı yalnızca kendi adına pet ekler/düzenler/siler; pet özel verisi
+  yalnızca sahibe. (Sağlık/sosyal/foto upload/Storage/paylaşım KAPSAM DIŞI.)
+- Yapıldı: **Yeni migration** `20260715140000_create_pets.sql` (mevcut migration'lara
+  DOKUNULMADI): `pets` tablosu (owner_id FK profiles on delete cascade + tüm alanlar,
+  species/sex/uzunluk/ağırlık check'leri), `pets_before_update` trigger (owner_id/id/
+  created_at değişmez; updated_at=now()), deny-by-default RLS (select/insert/update/
+  delete yalnız `owner_id = auth.uid()`; insert WITH CHECK), owner index. Flutter:
+  `Pet` modeli + `PetSex` enum + `PetDraft`; `PetValidators`; `PetErrorMapper`
+  (+`PetFailure`, ham hata sızmaz); `PetRepository` + `SupabasePetRepository`
+  (`buildPetWrite` owner_id/id hariç; owner_id insert'te auth oturumundan);
+  `petRepositoryProvider` + `myPetsProvider`; `PetsScreen` (Petlerim sekmesi: liste/
+  boş/loading/error+retry) + `PetFormScreen` (ekle/düzenle/sil, `/pet-form`). PetTypeIcon
+  kullanıldı; pixel-art/hayvan çizimi yok.
+- SQL/RLS: **Gerçek PostgreSQL 16** RLS testleri (`pets_rls_test.sql`, 8 senaryo) koştu
+  ve **TÜMÜ GEÇTİ** (sahip ekler; owner_id spoof reddedilir; başkası okuyamaz/güncelleyemez/
+  silemez; owner_id devri engellenir; geçersiz species reddedilir; sahip siler).
+- Test yapıldı: `dart format` ✅ · `flutter analyze` (No issues) ✅ · `flutter test`
+  → **81 test** ✅ (Pet parse, PetSex, validatorlar, buildPetWrite owner_id-hariç,
+  liste loading/empty/data/error, form create + delete).
+- Manuel: Yeni migration'ın gerçek Supabase'e uygulanması → OPS-006.
+- Bağımlılık: PROFILE-001.
+- Durum: **done** (canlıya uygulama OPS-006).
+
 ## PET-002 · Sosyal pet görünümü (pet_public_view) — todo
 - Bağımlılık: PROFILE-001.
 
@@ -269,20 +296,23 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 ---
 
 ## Test Borcu
-- **OPS-001 · Uzak migration history baseline (SETUP-003 canlı):** Migration
-  `20260714093000_create_profiles` uzak development DB'sine **SQL Editor**
-  üzerinden uygulandı; bu yüzden `supabase_migrations.schema_migrations`
-  history'si bu sürümü **içermiyor** (yerel migrations ↔ uzak history uyumsuz).
+- **OPS-001 · Uzak migration history baseline (SETUP-003 + PRIVACY-001 canlı):**
+  Şu **iki** migration uzak development DB'sine **SQL Editor** ile uygulandı ve bu
+  yüzden `supabase_migrations.schema_migrations` history'si bunları **içermiyor**
+  (yerel migrations ↔ uzak history uyumsuz): `20260714093000_create_profiles` **ve**
+  `20260715120000_privacy_discovery`.
   Bu ortamın egress politikası `*.supabase.co`'yu engellediğinden CLI baseline'ı
   burada yapılamıyor. **Nasıl kapatılır:** (a) SALT OKUNUR ön doğrulama —
   `supabase/checks/verify_remote_profiles.sql` SQL Editor'da koşulur, Bölüm 1'in
   tüm satırları `OK`; (b) CLI erişimi olan makinede `supabase link --project-ref
   ckocodjkvwzqyyilbqli` → `supabase migration repair --status applied
-  20260714093000` → `supabase migration list` (Local+Remote senkron) →
-  (opsiyonel) `supabase db diff` (fark yok). **Kapatma koşulu:** `migration list`
-  çıktısında sürüm hem Local hem Remote'ta görünür ve `db diff` fark üretmez.
-  Ayrıntılı plan: `docs/SUPABASE_MIGRATION_BASELINE.md`. **Kural:** repair
-  yapılmadan `supabase db push` çalıştırılmaz.
+  20260714093000` **ve** `... repair --status applied 20260715120000` → `supabase
+  migration list` (Local+Remote senkron) → (opsiyonel) `supabase db diff` (fark yok).
+  **Kapatma koşulu:** `migration list` çıktısında **her iki** sürüm hem Local hem
+  Remote'ta görünür ve `db diff` fark üretmez. Ayrıntılı plan:
+  `docs/SUPABASE_MIGRATION_BASELINE.md`. **Kural:** her iki migration da canlıda
+  ZATEN uygulanmış olduğundan `supabase db push` ÇALIŞTIRILMAZ; yalnızca `repair`
+  ile history işaretlenir (aksi halde tekrar uygulama hatası olur).
 - **OPS-002 · Canlı Supabase Auth doğrulaması (AUTH-001):** Kayıt → doğrulama
   e-postası → doğrulama → giriş → çıkış akışının gerçek Supabase projesinde uçtan
   uca testi bu geliştirme ortamında yapılamadı (egress `*.supabase.co`'yu engelliyor
@@ -299,15 +329,16 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   **Nasıl kapatılır:** (a) Supabase Dashboard'da Redirect URL'ler eklenir; (b)
   gerçek cihaz/emülatörde kayıt → doğrulama linki → uygulama açılır → ana ekran;
   (c) şifre sıfırlama linki → yeni şifre ekranı açılır → güncelle → giriş.
-- **OPS-005 · Yeni gizlilik migration'ının canlıya uygulanması (PRIVACY-001):**
-  `20260715120000_privacy_discovery.sql` gerçek PostgreSQL 16'da test edildi ama
-  **canlı Supabase'e uygulanmadı** (egress `*.supabase.co` engelli + OPS-001 migration
-  history baseline'ı hâlâ açık). **Nasıl kapatılır (SIRA ÖNEMLİ):** (a) önce OPS-001
-  baseline repair yapılır (`supabase migration repair --status applied 20260714093000`);
-  (b) sonra `supabase db push` YALNIZCA yeni migration'ı (`20260715120000`) uygular —
-  baseline'dan önce push ÇALIŞTIRILMAZ, eski migration tekrar uygulanmaz. Detay:
-  `docs/SUPABASE_MIGRATION_BASELINE.md`. Bu migration'ı "canlıya uygulandı" diye
-  raporlama; yalnızca yerel doğrulandı.
+- **OPS-005 · Gizlilik migration'ı canlıya uygulandı (PRIVACY-001) — ÇÖZÜLDÜ:**
+  `20260715120000_privacy_discovery.sql` 2026-07-15'te gerçek Supabase development
+  projesine SQL Editor ile **uygulandı ve doğrulandı** (view/fn/policy/RLS mevcut).
+  Kalan tek şey migration history baseline (bu sürüm de) → **OPS-001**'e dahil.
+- **OPS-006 · pets migration'ının canlıya uygulanması (PET-001):**
+  `20260715140000_create_pets.sql` gerçek PostgreSQL 16'da RLS testleriyle doğrulandı
+  ama **canlı Supabase'e uygulanmadı** (bu ortamdan Supabase'e erişim yok). **Nasıl
+  kapatılır:** kullanıcı SQL Editor'dan bu dosyayı çalıştırır (veya baseline sonrası
+  `supabase db push`). SQL Editor kullanılırsa migration history baseline'ına bu sürüm
+  de eklenir (OPS-001 kapsamı). Uygulanmadan "canlı" diye raporlanmaz.
 - **TD-001 · Android debug build (SETUP-001):** Bu geliştirme ortamında Android SDK
   yok ve `dl.google.com` organizasyon egress politikası ile engelli (403), bu yüzden
   `sdkmanager`/`build-tools` indirilemiyor ve gerçek `flutter build apk --debug`
@@ -319,5 +350,5 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**PET-001** (pet ekleme/düzenleme/silme — özel alanlar). Ayrı ve onaylı bir
-adımda başlanacak; PRIVACY-001 burada durur.
+**PET-002** (sosyal pet görünümü — `pet_public_view`). Ayrı ve onaylı bir adımda
+başlanacak; PET-001 burada durur.

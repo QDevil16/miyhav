@@ -1,5 +1,33 @@
 # COMPLETED — Tamamlanan Görevler
 
+## PET-001 · Pet ekleme/düzenleme/silme (özel; yalnızca sahibe)
+- **Tarih:** 2026-07-15
+- **Özet:** Kullanıcı yalnızca kendi adına pet ekler/düzenler/siler; pet özel verisi
+  yalnızca sahibe. **Yeni migration** `20260715140000_create_pets.sql` (mevcut
+  migration'lara dokunulmadı): `pets` tablosu (owner_id FK profiles on delete cascade;
+  name/species/breed/sex/birth_date/is_birth_date_estimated/color/current_weight/
+  profile_photo_path/short_description/microchip_number/is_neutered; species+sex+uzunluk+
+  ağırlık check'leri), `pets_before_update` trigger (owner_id/id/created_at değişmez),
+  deny-by-default RLS (select/insert/update/delete yalnız `owner_id=auth.uid()`, insert
+  WITH CHECK), owner index. Flutter: `Pet`/`PetSex`/`PetDraft`, `PetValidators`,
+  `PetErrorMapper` (ham hata sızmaz), `PetRepository`+`SupabasePetRepository`
+  (`buildPetWrite` owner_id/id hariç; owner_id insert'te auth oturumundan),
+  `myPetsProvider`, `PetsScreen` (Petlerim: liste/boş/loading/error+retry) ve
+  `PetFormScreen` (ekle/düzenle/sil onaylı; `/pet-form`). PetTypeIcon kullanıldı;
+  foto upload/Storage/sağlık/sosyal YOK.
+- **owner_id güvenliği:** insert'te owner_id yalnız `auth.uid()` (repo + RLS WITH CHECK);
+  update'te owner_id payload'a KONMAZ + BEFORE UPDATE trigger eski değere sabitler →
+  başka kullanıcıya devredilemez. RLS başkasının petini okutmaz/güncelletmez/sildirmez.
+- **SQL/RLS testi (gerçekten koştu):** Yerel **PostgreSQL 16** `pets_rls_test.sql` 8
+  senaryo → **TÜMÜ GEÇTİ** (owner_id spoof insert reddi, cross-user read/update/delete
+  reddi, owner_id devri engeli, species check, sahip CRUD).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → **81 test All passed** (Pet parse, PetSex, validatorlar,
+  buildPetWrite owner_id-hariç, liste loading/empty/data/error+retry, form create+delete).
+- **Test borcu:** OPS-006 — pets migration'ının canlı Supabase'e uygulanması.
+- **Commit:** `feat: add pets table, RLS and own-pet CRUD (PET-001)`
+- **Durum:** done (canlıya uygulama OPS-006).
+
 ## PRIVACY-001 · Profil gizliliği + güvenli keşif projeksiyonu (RLS)
 - **Tarih:** 2026-07-15
 - **Özet:** 3 seviyeli gizlilik modeli backend+RLS seviyesinde uygulandı (UI/arkadaşlık/
@@ -28,10 +56,16 @@
   `privacy_rls_test.sql` → **profiles + PRIVACY-001 (16 senaryo) TÜMÜ GEÇTİ**. Flutter:
   `dart format` ✅ · `flutter analyze` → *No issues found* ✅ · `flutter test` →
   **68 test All passed**.
-- **Test borcu:** OPS-005 — yeni migration'ın canlı Supabase'e uygulanması (OPS-001
-  baseline repair'inden SONRA; bu ortamdan Supabase'e erişim yok).
+- **Canlı doğrulama (2026-07-15):** `20260715120000_privacy_discovery.sql` gerçek
+  Supabase development projesine SQL Editor ile uygulandı ve doğrulandı: `public_profiles`
+  view, `search_profiles` + `is_account_active` fonksiyonları, `profiles_select_public`
+  policy mevcut; profiles'ta RLS açık. Wildcard/LIKE kaçırma güvenlik düzeltmesi
+  commit `7016215`. Migration history baseline (bu sürüm + 20260714093000) → OPS-001.
+- **Test borcu:** OPS-001 — uzak migration history baseline (iki sürüm birlikte;
+  repair ile işaretlenecek, canlıda zaten uygulanmış olduğundan `db push` YOK).
 - **Commit:** `feat: add profile privacy RLS and secure discovery projection (PRIVACY-001)`
-- **Durum:** done (canlı uygulama OPS-005'te).
+  (+ güvenlik düzeltmesi `7016215`).
+- **Durum:** done (canlı doğrulandı).
 
 ## PROFILE-001 · Kendi profil görüntüleme/düzenleme + username uniqueness
 - **Tarih:** 2026-07-15
