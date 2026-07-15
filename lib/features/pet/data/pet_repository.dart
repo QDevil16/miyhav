@@ -42,6 +42,9 @@ abstract interface class PetRepository {
 
   /// Kendi petini siler.
   Future<void> deletePet(String id);
+
+  /// Yalnızca `profile_photo_path` kolonunu günceller (fotoğraf ekle/sil sonrası).
+  Future<void> setProfilePhotoPath(String id, String? path);
 }
 
 /// [PetRepository]'nin Supabase uygulaması. RLS gereği yalnızca kullanıcının kendi
@@ -110,6 +113,18 @@ class SupabasePetRepository implements PetRepository {
   Future<void> deletePet(String id) async {
     try {
       await _client.from(_table).delete().eq('id', id);
+    } catch (error) {
+      throw PetErrorMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> setProfilePhotoPath(String id, String? path) async {
+    try {
+      await _client
+          .from(_table)
+          .update(<String, dynamic>{'profile_photo_path': path})
+          .eq('id', id);
     } catch (error) {
       throw PetErrorMapper.map(error);
     }

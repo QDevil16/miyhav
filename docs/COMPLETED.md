@@ -1,5 +1,37 @@
 # COMPLETED — Tamamlanan Görevler
 
+## PET-MEDIA-001 · Pet profil fotoğrafı (private Storage + owner-only)
+- **Tarih:** 2026-07-15
+- **Özet:** Kullanıcı kendi peti için profil fotoğrafı seçer (kamera/galeri → kırp →
+  yükle). **Yeni migration** `20260715160000_pets_storage.sql` (mevcut migration'lara
+  dokunulmadı): `pets` **private** Storage bucket (`public=false`) + `storage.objects`
+  üzerinde deny-by-default 4 politika (`pets_media_owner_{select,insert,update,delete}`,
+  `to authenticated`, `bucket_id='pets' AND (storage.foldername(name))[1]=auth.uid()`).
+  Flutter: `PetMediaRepository`+`SupabasePetMediaRepository` (upload/delete/signed URL;
+  `uploadBinary` upsert=true, contentType image/jpeg; `PetErrorMapper` Türkçe hata),
+  `PetPhotoPicker`+`ImagePickerCropper` (kamera/galeri → kırp; uzun kenar 1200px; JPEG
+  %85), `petProfilePhotoObjectName` yol yardımcısı, `setProfilePhotoPath`
+  (`pets.profile_photo_path`), provider'lar. `PetFormScreen` düzenleme modunda foto
+  bölümü: Fotoğraf Ekle/Değiştir/Sil, loading overlay, signed URL ile önizleme, foto
+  yoksa `DefaultProfileAvatar`. Native: Android `UCropActivity`, iOS kamera/galeri
+  kullanım açıklamaları. Pixel-art yok; PetTypeIcon aynı.
+- **Yol:** `pets/{userId}/{petId}/profile.jpg` — tek dosya, her yüklemede üzerine yazılır
+  (yeni isim üretilmez).
+- **Storage güvenliği:** bucket private (imzasız public URL yok, önizleme signed URL ile).
+  RLS klasörün ilk segmentini `auth.uid()`'e sabitler → kullanıcı yalnız kendi
+  `{userId}/...` yolunu yükler/okur/siler; başkasının yolu reddedilir.
+- **SQL/RLS testi (gerçekten koştu):** Yerel **PostgreSQL 16** `pets_storage_rls_test.sql`
+  7 senaryo (+`_shim_storage_local.sql`) → **TÜMÜ GEÇTİ** (sahip yükler; foldername spoof
+  insert reddi; cross-user read/delete reddi; sahip read/delete; bucket private).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → **84 test All passed** (yol yardımcısı, Fotoğraf Ekle→upload→path,
+  Fotoğraf Sil→storage+path temizleme).
+- **Paketler:** `image_picker ^1.2.3`, `image_cropper ^12.2.1`, `supabase_flutter` Storage.
+- **Test borcu:** OPS-007 — Storage bucket + RLS migration'ının canlı Supabase'e
+  uygulanması.
+- **Commit:** `feat: add pet profile photo storage bucket, RLS and media repository (PET-MEDIA-001)`
+- **Durum:** done (canlıya uygulama OPS-007).
+
 ## PET-001 · Pet ekleme/düzenleme/silme (özel; yalnızca sahibe)
 - **Tarih:** 2026-07-15
 - **Özet:** Kullanıcı yalnızca kendi adına pet ekler/düzenler/siler; pet özel verisi

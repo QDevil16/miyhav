@@ -43,6 +43,17 @@ class FakePetRepository implements PetRepository {
     _pets.removeWhere((Pet p) => p.id == id);
   }
 
+  String? lastPhotoPathId;
+  Object? lastPhotoPath;
+  bool photoPathWasSet = false;
+
+  @override
+  Future<void> setProfilePhotoPath(String id, String? path) async {
+    lastPhotoPathId = id;
+    lastPhotoPath = path;
+    photoPathWasSet = true;
+  }
+
   Pet _fromDraft(String id, String owner, PetDraft d) => Pet(
     id: id,
     ownerId: owner,

@@ -241,6 +241,33 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 - Bağımlılık: PROFILE-001.
 - Durum: **done** (canlıya uygulama OPS-006).
 
+## PET-MEDIA-001 · Pet profil fotoğrafı (private Storage + owner-only) — **done**
+- Amaç: Kullanıcı kendi peti için profesyonel profil fotoğrafı seçer (kamera/galeri
+  → kırp → yükle). Tek dosya, üzerine yazılır. (Sosyal/çoklu foto/albüm/sağlık/AI/
+  R2/CDN/watermark KAPSAM DIŞI.)
+- Yapıldı: **Yeni migration** `20260715160000_pets_storage.sql` (mevcut migration'lara
+  DOKUNULMADI): `pets` **private** Storage bucket (`public=false`) + `storage.objects`
+  üzerinde deny-by-default 4 politika (`pets_media_owner_{select,insert,update,delete}`,
+  `to authenticated`, `bucket_id='pets' AND (storage.foldername(name))[1] = auth.uid()`).
+  Flutter: `PetMediaRepository` + `SupabasePetMediaRepository` (upload/delete/signed URL,
+  `uploadBinary` upsert=true, contentType image/jpeg, `PetErrorMapper` ile Türkçe hata);
+  `PetPhotoPicker` + `ImagePickerCropper` (kamera/galeri → kırp, uzun kenar 1200px,
+  JPEG %85); `petProfilePhotoObjectName` yol yardımcısı; `pets.profile_photo_path`
+  yazan `setProfilePhotoPath`; provider'lar; `PetFormScreen` düzenleme modunda foto
+  bölümü (Fotoğraf Ekle/Değiştir/Sil, loading overlay, signed URL, foto yoksa
+  `DefaultProfileAvatar`). Native: Android `UCropActivity`, iOS `NSCameraUsageDescription`
+  + `NSPhotoLibraryUsageDescription`. Pixel-art yok; PetTypeIcon aynı.
+- SQL/RLS: **Gerçek PostgreSQL 16** Storage RLS testleri (`pets_storage_rls_test.sql`,
+  7 senaryo) + `_shim_storage_local.sql` koştu ve **TÜMÜ GEÇTİ** (sahip yükler; foldername
+  spoof insert reddedilir; başkası okuyamaz/silemez; sahip okur/siler; bucket private).
+- Test yapıldı: `dart format` ✅ · `flutter analyze` (No issues) ✅ · `flutter test`
+  → **84 test** ✅ (yol yardımcısı, Fotoğraf Ekle → upload → path kaydet, Fotoğraf Sil).
+- Paketler: `image_picker ^1.2.3`, `image_cropper ^12.2.1` (mevcut `supabase_flutter`
+  Storage API'si).
+- Manuel: Yeni Storage migration'ının gerçek Supabase'e uygulanması → OPS-007.
+- Bağımlılık: PET-001.
+- Durum: **done** (canlıya uygulama OPS-007).
+
 ## PET-002 · Sosyal pet görünümü (pet_public_view) — todo
 - Bağımlılık: PROFILE-001.
 
@@ -339,6 +366,12 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   kapatılır:** kullanıcı SQL Editor'dan bu dosyayı çalıştırır (veya baseline sonrası
   `supabase db push`). SQL Editor kullanılırsa migration history baseline'ına bu sürüm
   de eklenir (OPS-001 kapsamı). Uygulanmadan "canlı" diye raporlanmaz.
+- **OPS-007 · pets Storage bucket + RLS'in canlıya uygulanması (PET-MEDIA-001):**
+  `20260715160000_pets_storage.sql` gerçek PostgreSQL 16'da Storage RLS testleriyle
+  doğrulandı ama **canlı Supabase'e uygulanmadı** (bu ortamdan Supabase'e erişim yok).
+  **Nasıl kapatılır:** kullanıcı SQL Editor'dan bu dosyayı çalıştırır (bucket + 4 politika)
+  veya baseline sonrası `supabase db push`. SQL Editor kullanılırsa bu sürüm de migration
+  history baseline'ına eklenir (OPS-001 kapsamı). Uygulanmadan "canlı" diye raporlanmaz.
 - **TD-001 · Android debug build (SETUP-001):** Bu geliştirme ortamında Android SDK
   yok ve `dl.google.com` organizasyon egress politikası ile engelli (403), bu yüzden
   `sdkmanager`/`build-tools` indirilemiyor ve gerçek `flutter build apk --debug`
@@ -351,4 +384,4 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 
 ## Sonraki Görev
 **PET-002** (sosyal pet görünümü — `pet_public_view`). Ayrı ve onaylı bir adımda
-başlanacak; PET-001 burada durur.
+başlanacak; PET-MEDIA-001 burada durur.

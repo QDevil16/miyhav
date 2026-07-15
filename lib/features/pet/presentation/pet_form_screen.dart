@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,9 +10,11 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/validation/pet_validators.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
+import '../../../shared/widgets/default_profile_avatar.dart';
 import '../../../shared/widgets/miyhav_app_bar.dart';
 import '../../../shared/widgets/pet_type_icon.dart';
 import '../application/pet_providers.dart';
+import '../data/pet_photo_picker.dart';
 import '../data/pet_repository.dart';
 import '../domain/pet.dart';
 
@@ -43,6 +47,10 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
   String? _nameError;
   String? _weightError;
 
+  String? _photoPath;
+  String? _photoUrl;
+  bool _photoBusy = false;
+
   bool get _isEdit => widget.pet != null;
 
   @override
@@ -61,6 +69,92 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
       _birthDate = pet.birthDate;
       _birthEstimated = pet.isBirthDateEstimated;
       _neutered = pet.isNeutered ?? false;
+      _photoPath = pet.profilePhotoPath;
+      _loadSignedUrl();
+    }
+  }
+
+  Future<void> _loadSignedUrl() async {
+    final String? path = _photoPath;
+    if (path == null) return;
+    try {
+      final String url = await ref
+          .read(petMediaRepositoryProvider)
+          .createSignedUrl(path);
+      if (mounted) setState(() => _photoUrl = url);
+    } on PetFailure {
+      // İmzalı URL alınamazsa sessizce varsayılan avatara düşülür.
+      if (mounted) setState(() => _photoUrl = null);
+    }
+  }
+
+  Future<void> _pickPhoto() async {
+    final PhotoSource? source = await showModalBottomSheet<PhotoSource>(
+      context: context,
+      builder: (BuildContext ctx) => SafeArea(
+        child: Wrap(
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Kameradan çek'),
+              onTap: () => Navigator.of(ctx).pop(PhotoSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Galeriden seç'),
+              onTap: () => Navigator.of(ctx).pop(PhotoSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    setState(() => _photoBusy = true);
+    try {
+      final Uint8List? bytes = await ref
+          .read(petPhotoPickerProvider)
+          .pickAndCrop(source);
+      if (bytes == null) return; // kullanıcı vazgeçti
+      final String name = await ref
+          .read(petMediaRepositoryProvider)
+          .uploadProfilePhoto(widget.pet!.id, bytes);
+      await ref
+          .read(petRepositoryProvider)
+          .setProfilePhotoPath(widget.pet!.id, name);
+      ref.invalidate(myPetsProvider);
+      if (!mounted) return;
+      _photoPath = name;
+      _photoUrl = null;
+      await _loadSignedUrl();
+      if (mounted) _snack('Fotoğraf güncellendi.');
+    } on PetFailure catch (failure) {
+      if (mounted) _snack(failure.message);
+    } finally {
+      if (mounted) setState(() => _photoBusy = false);
+    }
+  }
+
+  Future<void> _removePhoto() async {
+    final String? path = _photoPath;
+    if (path == null) return;
+    setState(() => _photoBusy = true);
+    try {
+      await ref.read(petMediaRepositoryProvider).deleteProfilePhoto(path);
+      await ref
+          .read(petRepositoryProvider)
+          .setProfilePhotoPath(widget.pet!.id, null);
+      ref.invalidate(myPetsProvider);
+      if (!mounted) return;
+      setState(() {
+        _photoPath = null;
+        _photoUrl = null;
+      });
+      _snack('Fotoğraf silindi.');
+    } on PetFailure catch (failure) {
+      if (mounted) _snack(failure.message);
+    } finally {
+      if (mounted) setState(() => _photoBusy = false);
     }
   }
 
@@ -206,6 +300,16 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
                 AppSpacing.xxl,
               ),
               children: <Widget>[
+                if (_isEdit) ...<Widget>[
+                  _PhotoSection(
+                    photoUrl: _photoUrl,
+                    hasPhoto: _photoPath != null,
+                    busy: _photoBusy,
+                    onAddOrChange: _photoBusy ? null : _pickPhoto,
+                    onRemove: _photoBusy ? null : _removePhoto,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
                 Text(
                   'Tür',
                   style: AppTypography.label.copyWith(color: scheme.onSurface),
@@ -364,6 +468,83 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
       color: Theme.of(context).colorScheme.onSurface,
     ),
   );
+}
+
+/// Pet profil fotoğrafı bölümü: önizleme (yoksa DefaultProfileAvatar) + ekle/
+/// değiştir/sil eylemleri + yükleme göstergesi.
+class _PhotoSection extends StatelessWidget {
+  const _PhotoSection({
+    required this.photoUrl,
+    required this.hasPhoto,
+    required this.busy,
+    required this.onAddOrChange,
+    required this.onRemove,
+  });
+
+  final String? photoUrl;
+  final bool hasPhoto;
+  final bool busy;
+  final VoidCallback? onAddOrChange;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    const double size = 104;
+    return Column(
+      children: <Widget>[
+        SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              ClipOval(
+                child: photoUrl != null
+                    ? Image.network(
+                        photoUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) =>
+                            const DefaultProfileAvatar(size: size),
+                      )
+                    : const DefaultProfileAvatar(size: size),
+              ),
+              if (busy)
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0x66000000),
+                  ),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextButton.icon(
+              onPressed: onAddOrChange,
+              icon: Icon(
+                hasPhoto ? Icons.edit_outlined : Icons.add_a_photo_outlined,
+              ),
+              label: Text(hasPhoto ? 'Fotoğraf Değiştir' : 'Fotoğraf Ekle'),
+            ),
+            if (hasPhoto)
+              TextButton.icon(
+                onPressed: onRemove,
+                icon: const Icon(Icons.delete_outline_rounded),
+                label: const Text('Fotoğraf Sil'),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
 }
 
 class _ChoiceChip extends StatelessWidget {
