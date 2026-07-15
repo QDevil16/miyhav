@@ -86,11 +86,25 @@ tanımlandı. Gerekçe: çalışma zamanı font indirme yasak; statik ağırlık
 öngörülebilir render verir. Türkçe glyph kapsamı doğrulandı. Lisans (SIL OFL)
 `assets/fonts/Jost-OFL.txt` ile birlikte tutulur.
 
-## D-016 · Pixel-art pet asset sistemi
-Placeholder pet avatarları indirilmiş görsel yerine kod içi 12×12 özgün pixel
-desenlerinden `CustomPainter` ile çizilir (`PetPixelAvatar`). Gerekçe: telifsiz,
-özgün, ölçeklenebilir, ağ bağımlılığı yok. Gerçek foto yüklenene kadar kullanılır;
-yeni tür desenleri kolayca eklenir.
+## D-016 · Pixel-art pet asset sistemi — **GEÇERSİZ (D-019 ile değiştirildi)**
+~~Placeholder pet avatarları kod içi 12×12 pixel desenlerinden çizilirdi
+(`PetPixelAvatar`).~~ Canlı testte pixel-art görünümü eski oyun estetiği verdiği
+ve hedeflenen modern/premium kaliteye uymadığı için tamamen kaldırıldı. Yerine
+D-019 (hazır ikon sistemi) geçti.
+
+## D-019 · Hazır ikon tabanlı pet türü sistemi (elle çizim yerine)
+Pet türleri için elle hayvan çizimi (CustomPainter/SVG/pixel/emoji) YAPILMAZ.
+Bunun yerine hazır, profesyonel ve tanınabilir tek bir ikon ailesi kullanılır:
+**Lucide** (`lucide_icons_flutter`, tek icon package; ince/tutarlı çizgi, ISC
+lisans). Eşleme: cat→cat, dog→dog, bird→bird, rabbit→rabbit, fish→fish,
+reptile→turtle, other→pawPrint. Merkezî widget `PetTypeIcon(type, size, selected)`:
+yuvarlak sade zemin + ortada tür ikonu; seçili iken soft coral vurgu (ince coral
+çerçeve + çok hafif coral zemin). Varsayılan kullanıcı profili `DefaultProfileAvatar`
+(pastel coral yüzey + Lucide pati). Aynı `PetTypeIcon`, fotoğrafsız pet avatarı
+(fallback) olarak da kullanılır. Gradient/3D/ağır gölge yok; Miyhav paletiyle uyumlu.
+Gerekçe: birkaç kez denenen özgün çizim/illüstrasyon yaklaşımları (pixel, flat
+silüet, sevimli yüz, line-art) yeterince premium/tanınabilir bulunmadı; hazır kaliteli
+ikon seti temiz, tutarlı ve ilk bakışta anlaşılır sonuç verir. Tek paket sınırı korunur.
 
 ## D-018 · Auth yönlendirme kapısı (AUTH-001)
 Oturum/doğrulama durumu tek bir `AuthStatus` (unauthenticated / unverified /

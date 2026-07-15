@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_typography.dart';
 
 /// Genel kullanıcı avatarı. Fotoğraf yoksa baş harf(ler)i veya ikon gösterir.
-/// (Pet avatarı için [PetPixelAvatar] kullanılır.)
+/// (İsimsiz varsayılan profil için [DefaultProfileAvatar]; pet türü ikonu için
+/// [PetTypeIcon] kullanılır.)
 class AppAvatar extends StatelessWidget {
   const AppAvatar({super.key, this.displayName, this.size = 48, this.icon});
 

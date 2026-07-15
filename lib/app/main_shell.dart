@@ -10,7 +10,7 @@ import '../shared/widgets/app_card.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/miyhav_app_bar.dart';
 import '../shared/widgets/miyhav_bottom_nav.dart';
-import '../shared/widgets/pet_pixel_avatar.dart';
+import '../shared/widgets/pet_type_icon.dart';
 
 /// Ana uygulama kabuğu: alt navigasyon + sekme gövdeleri (iskelet).
 ///
@@ -160,7 +160,7 @@ class _HomeShowcase extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             children: <Widget>[
-              const PetPixelAvatar(kind: PixelPetKind.cat, size: 84),
+              const PetTypeIcon(type: PetType.cat, size: 84),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -191,14 +191,7 @@ class _HomeShowcase extends StatelessWidget {
           style: AppTypography.h3.copyWith(color: scheme.onSurface),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.md,
-          children: <Widget>[
-            for (final PixelPetKind kind in PixelPetKind.values)
-              PetPixelAvatar(kind: kind, size: 64),
-          ],
-        ),
+        const _PetTypeGallery(),
         const SizedBox(height: AppSpacing.md),
         AppCard(
           child: Row(
@@ -215,6 +208,75 @@ class _HomeShowcase extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// "Türler" bölümü: modern pet illüstrasyonlarını seçilebilir olarak gösterir.
+/// Seçili tür zarif bir çerçeve + hafif vurgu + tür adı etiketi ile belirir.
+class _PetTypeGallery extends StatefulWidget {
+  const _PetTypeGallery();
+
+  @override
+  State<_PetTypeGallery> createState() => _PetTypeGalleryState();
+}
+
+class _PetTypeGalleryState extends State<_PetTypeGallery> {
+  PetType _selected = PetType.cat;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.md,
+      children: <Widget>[
+        for (final PetType type in PetType.values)
+          _PetTypeTile(
+            type: type,
+            selected: type == _selected,
+            onTap: () => setState(() => _selected = type),
+          ),
+      ],
+    );
+  }
+}
+
+/// Tek bir pet türü: avatar + etiket; seçiliyken vurgulu çerçeve.
+class _PetTypeTile extends StatelessWidget {
+  const _PetTypeTile({
+    required this.type,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final PetType type;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 76,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          children: <Widget>[
+            PetTypeIcon(type: type, size: 64, selected: selected),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              petTypeLabel(type),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.caption.copyWith(
+                color: selected ? scheme.primary : scheme.onSurfaceVariant,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

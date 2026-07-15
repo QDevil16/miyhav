@@ -4,8 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:miyhav/core/theme/app_theme.dart';
 import 'package:miyhav/shared/widgets/app_button.dart';
 import 'package:miyhav/shared/widgets/app_card.dart';
+import 'package:miyhav/shared/widgets/default_profile_avatar.dart';
 import 'package:miyhav/shared/widgets/empty_state.dart';
-import 'package:miyhav/shared/widgets/pet_pixel_avatar.dart';
+import 'package:miyhav/shared/widgets/pet_type_icon.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
   theme: AppTheme.light,
@@ -40,19 +41,52 @@ void main() {
     expect(find.text('içerik yok'), findsOneWidget);
   });
 
-  testWidgets('PetPixelAvatar tüm türler için çizilir', (
+  testWidgets('PetTypeIcon tüm türler için ikon gösterir', (
     WidgetTester tester,
   ) async {
-    for (final PixelPetKind kind in PixelPetKind.values) {
-      await tester.pumpWidget(_wrap(PetPixelAvatar(kind: kind, size: 64)));
-      expect(find.byType(CustomPaint), findsWidgets);
+    for (final PetType type in PetType.values) {
+      await tester.pumpWidget(_wrap(PetTypeIcon(type: type, size: 64)));
+      final Icon icon = tester.widget<Icon>(find.byType(Icon));
+      expect(icon.icon, petTypeIconData(type));
     }
   });
 
-  test('pixelPetKindFromSpecies tür eşlemesi doğru', () {
-    expect(pixelPetKindFromSpecies('cat'), PixelPetKind.cat);
-    expect(pixelPetKindFromSpecies('dog'), PixelPetKind.dog);
-    expect(pixelPetKindFromSpecies('fish'), PixelPetKind.other);
-    expect(pixelPetKindFromSpecies(null), PixelPetKind.other);
+  testWidgets('PetTypeIcon seçiliyken coral vurgu uygular', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(const PetTypeIcon(type: PetType.cat, size: 64, selected: true)),
+    );
+    final Container box = tester.widget<Container>(
+      find
+          .ancestor(of: find.byType(Icon), matching: find.byType(Container))
+          .first,
+    );
+    final BoxDecoration decoration = box.decoration! as BoxDecoration;
+    expect(decoration.border, isNotNull);
+  });
+
+  testWidgets('DefaultProfileAvatar pati ikonu gösterir', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_wrap(const DefaultProfileAvatar(size: 64)));
+    expect(find.byType(Icon), findsOneWidget);
+  });
+
+  test('petTypeFromSpecies tür eşlemesi doğru', () {
+    expect(petTypeFromSpecies('cat'), PetType.cat);
+    expect(petTypeFromSpecies('dog'), PetType.dog);
+    expect(petTypeFromSpecies('bird'), PetType.bird);
+    expect(petTypeFromSpecies('rabbit'), PetType.rabbit);
+    expect(petTypeFromSpecies('fish'), PetType.fish);
+    expect(petTypeFromSpecies('reptile'), PetType.reptile);
+    expect(petTypeFromSpecies('unknown'), PetType.other);
+    expect(petTypeFromSpecies(null), PetType.other);
+  });
+
+  test('petTypeLabel Türkçe etiketler döner', () {
+    expect(petTypeLabel(PetType.cat), 'Kedi');
+    expect(petTypeLabel(PetType.reptile), 'Sürüngen');
+    expect(petTypeLabel(PetType.other), 'Diğer');
   });
 }

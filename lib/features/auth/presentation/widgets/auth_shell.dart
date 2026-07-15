@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/widgets/pet_pixel_avatar.dart';
+import '../../../../shared/widgets/default_profile_avatar.dart';
 
 /// Auth ekranları için ortak, markalı ve kaydırılabilir düzen.
 ///
-/// Miyhav marka başlığı + pixel-art pet ile üstte; altta ekran içeriği.
+/// Miyhav marka başlığı + pati simgesi ile üstte; altta ekran içeriği.
 class AuthShell extends StatelessWidget {
   const AuthShell({
     super.key,
@@ -38,9 +38,7 @@ class AuthShell extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const Center(
-                    child: PetPixelAvatar(kind: PixelPetKind.cat, size: 88),
-                  ),
+                  const Center(child: DefaultProfileAvatar(size: 88)),
                   const SizedBox(height: AppSpacing.md),
                   Center(
                     child: Text(

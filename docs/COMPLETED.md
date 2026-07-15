@@ -1,5 +1,33 @@
 # COMPLETED — Tamamlanan Görevler
 
+## DESIGN-002 · Pet türü görselleri: hazır ikon sistemine geçiş
+- **Tarih:** 2026-07-15
+- **Özet:** Elle çizilen pet görselleri (önce pixel-art, ardından denenen özgün
+  illüstrasyon/line-art yaklaşımları) yeterince premium/tanınabilir bulunmadığı için
+  tamamen kaldırıldı. Yerine hazır, profesyonel ve tanınabilir tek bir ikon ailesi
+  (**Lucide**, `lucide_icons_flutter` — tek icon package, ince/tutarlı çizgi) kullanıldı.
+  Silinen: `pet_pixel_avatar.dart` ve tüm `CustomPainter` hayvan çizim kodu. Yeni:
+  `pet_type_icon.dart` — `PetType` (cat/dog/bird/rabbit/fish/reptile/other),
+  `petTypeFromSpecies`, `petTypeLabel` (Türkçe), `petTypeIconData` (tür→Lucide ikon:
+  reptile→turtle, other→pawPrint), ve merkezî `PetTypeIcon(type, size, selected)`
+  (yuvarlak sade zemin; seçili iken ince coral çerçeve + çok hafif coral zemin +
+  belirgin ikon). `default_profile_avatar.dart` sadeleştirildi: pastel coral yüzey +
+  Lucide pati (custom painter kaldırıldı). Ana ekran "Türler" bölümü
+  (`_PetTypeGallery`/`_PetTypeTile`) `PetTypeIcon`'un seçili durumunu kullanır +
+  Türkçe etiket. Hero ve `app_avatar.dart` yorumu güncellendi. Aynı `PetTypeIcon`
+  fotoğrafsız pet avatarı (fallback) olarak da kullanılır. Görsel çıktı (Lucide fontu
+  teste yüklenerek) render edilip doğrulandı: 7 tür + profil ilk bakışta tanınıyor.
+- **Kararlar:** D-016 geçersiz kılındı; D-019 hazır ikon sistemi olarak yeniden yazıldı.
+- **Bağımlılık:** `lucide_icons_flutter` (tek yeni paket; ISC lisans, Flutter uyumlu).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → **37 test All passed** (PetTypeIcon tür→ikon eşlemesi + seçili
+  vurgu, DefaultProfileAvatar, petTypeFromSpecies + petTypeLabel; mevcut auth/config/
+  tema testleri korunur).
+- **Temizlik:** lib/test'te pixel/PetPixelAvatar/PetTypeAvatar/PetIllustrationPainter/
+  CustomPainter hayvan çizim referansı kalmadı; UI_DESIGN_SYSTEM.md + DECISIONS.md güncel.
+- **Commit:** `feat: use Lucide icon system for pet types and default avatar`
+- **Durum:** done.
+
 ## AUTH-001 · Kayıt + e-posta doğrulama + giriş/çıkış
 - **Tarih:** 2026-07-15
 - **Özet:** Supabase Auth ile tam kayıt/giriş/çıkış + e-posta doğrulama kapısı.

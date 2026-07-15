@@ -5,8 +5,8 @@ illüstrasyon veya telifli karakterler (ör. Hello Kitty) **kopyalanmaz**. Miyha
 özgün tasarım dili oluşturulur.
 
 ## Tasarım Yönü
-"Özgün pixel-art pet dünyası ile modern, kaliteli, sıcak ve sosyal mobil uygulama
-deneyiminin birleşimi." Sıcak, yumuşak, ferah; büyük ve dengeli tipografi;
+"Modern, sıcak, premium ve sevimli bir pet uygulaması deneyimi." Sıcak, yumuşak,
+ferah; büyük ve dengeli tipografi;
 yuvarlatılmış kartlar; asimetrik ama anlaşılır kompozisyon; petleri öne çıkaran
 ekranlar. Jenerik demo / kurumsal / banka / çocuk oyunu / neon / aşırı gradyan
 hissinden uzak.
@@ -62,10 +62,15 @@ durumu, Yükleniyor durumu, Skeleton.
 - Varsayılan Flutter bileşenleri özelleştirmesiz bırakılmaz; ama her şey için
   gereksiz custom widget üretilmez — gerçek tekrar kullanım varsa ortak bileşen.
 
-## Pet Asset Sistemi (özgün, telifsiz)
-Pixel-art hissi veren özgün placeholder avatar sistemi. Kategori bazlı (kedi,
-köpek, kuş, tavşan, balık, sürüngen, diğer) özgün karakterler. Gerçek foto
-yüklenene kadar kaliteli placeholder. Telifli/marka görseli kullanılmaz.
+## Pet Asset Sistemi (hazır ikon, temiz + premium)
+Elle hayvan çizimi YOK. Pet türleri için hazır, tanınabilir tek bir ikon ailesi
+(**Lucide**) kullanılır. Merkezî widget `PetTypeIcon(type, size, selected)`: yuvarlak
+sade zemin + ortada tür ikonu (kedi, köpek, kuş, tavşan, balık, sürüngen→kaplumbağa,
+diğer→pati). Seçili iken soft coral vurgu (ince coral çerçeve + çok hafif coral zemin).
+Varsayılan kullanıcı profili `DefaultProfileAvatar` (pastel coral yüzey + Lucide pati)
+pet ikonlarından ayrışır. Aynı `PetTypeIcon`, fotoğrafsız pet avatarı (fallback) olarak
+kullanılır; foto varsa gerçek foto gösterilir. Gradient/3D yok, gölge minimum, Miyhav
+paletiyle uyumlu. Pixel-art/emoji/maskot/telifli görsel kullanılmaz (bkz. D-019).
 
 ## Durum Geri Bildirimi (zorunlu)
 Kullanıcı her zaman: nereye basacağını, hangi ekranda olduğunu, işlemin başarılı
@@ -95,15 +100,20 @@ karakter kapsamı doğrulandı (ç ğ ı İ ö ş ü). Lisans: `assets/fonts/Jos
 **Reusable bileşenler (`lib/shared/widgets/`):**
 `app_button.dart` (PrimaryButton/SecondaryButton), `app_text_field.dart` (şifre
 göster/gizle dahil), `app_card.dart` (imza yuvarlatılmış yüzey + accent varyantı),
-`app_avatar.dart` (kullanıcı, baş harf/ikon), `pet_pixel_avatar.dart` (özgün
-pixel-art pet — aşağıya bak), `empty_state.dart`, `loading_state.dart`,
+`app_avatar.dart` (kullanıcı, baş harf/ikon), `default_profile_avatar.dart`
+(varsayılan pati profil avatarı), `pet_type_icon.dart` (hazır Lucide pet türü
+ikonları — aşağıya bak), `empty_state.dart`, `loading_state.dart`,
 `miyhav_app_bar.dart`, `miyhav_bottom_nav.dart` (özel yüzen pill navigasyon).
 
 **Alt navigasyon:** `MainShell` (`lib/app/main_shell.dart`) 5 geçici sekme —
 Ana Sayfa · Keşfet · Paylaş · Petlerim · Profil. Gerçek feature/backend YOK;
 sekmeler tasarım sistemini sergileyen geçici içerik gösterir.
 
-**Pet asset sistemi:** `PetPixelAvatar` — indirilmiş/telifli görsel YOK. 12×12
-özgün pixel desenleri koddan `CustomPainter` ile çizilir (cat/dog/bird/rabbit +
-jenerik "other" fallback; fish/reptile/other → other). Her tür kendi sıcak gövde
-tonunu kullanır. Yeni türler için desen eklenebilir.
+**Pet asset sistemi (DESIGN-002 ile hazır ikonlara geçti):** `PetTypeIcon` —
+elle çizim YOK, pixel/emoji/maskot YOK. 7 tür (cat/dog/bird/rabbit/fish/reptile→
+turtle/other→paw) hazır **Lucide** ikonlarıyla, yuvarlak sade zeminde gösterilir.
+Seçili iken soft coral vurgu (ince coral çerçeve + çok hafif coral zemin + belirgin
+ikon/yazı). Varsayılan kullanıcı profili `DefaultProfileAvatar` (pastel coral yüzey +
+Lucide pati). Aynı `PetTypeIcon` fotoğrafsız pet avatarı olarak da kullanılır (foto
+varsa gerçek foto). Ana ekran "Türler" bölümü bu ikonlarla seçilebilir + Türkçe
+etiketli. Tek icon package (`lucide_icons_flutter`); gradient/3D yok, gölge minimum.
