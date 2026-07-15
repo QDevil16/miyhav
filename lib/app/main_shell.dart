@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/errors/auth_error_mapper.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../features/auth/application/auth_providers.dart';
+import '../shared/widgets/app_button.dart';
 import '../shared/widgets/app_card.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/miyhav_app_bar.dart';
@@ -75,12 +79,63 @@ class _MainShellState extends State<MainShell> {
           actionLabel: 'Pet Ekle',
         );
       default:
-        return const EmptyState(
-          title: 'Profilin',
-          message: 'Profil ve ayarların burada olacak.',
-          icon: Icons.person_rounded,
-        );
+        return const _ProfileTab();
     }
+  }
+}
+
+/// Profil sekmesi iskeleti. Gerçek profil (PROFILE-001) ileride gelecek; şimdilik
+/// yalnızca oturumu kapatma eylemini içerir.
+class _ProfileTab extends ConsumerStatefulWidget {
+  const _ProfileTab();
+
+  @override
+  ConsumerState<_ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends ConsumerState<_ProfileTab> {
+  bool _signingOut = false;
+
+  Future<void> _signOut() async {
+    setState(() => _signingOut = true);
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+      // Oturum kapanınca auth durumu değişir → router giriş ekranına yönlendirir.
+    } on AuthFailure catch (failure) {
+      if (!mounted) return;
+      setState(() => _signingOut = false);
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(failure.message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        const Expanded(
+          child: EmptyState(
+            title: 'Profilin',
+            message: 'Profil ve ayarların burada olacak.',
+            icon: Icons.person_rounded,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            AppSpacing.xl,
+          ),
+          child: SecondaryButton(
+            label: _signingOut ? 'Çıkış yapılıyor…' : 'Çıkış Yap',
+            icon: Icons.logout_rounded,
+            onPressed: _signingOut ? null : _signOut,
+          ),
+        ),
+      ],
+    );
   }
 }
 

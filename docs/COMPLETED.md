@@ -1,5 +1,34 @@
 # COMPLETED — Tamamlanan Görevler
 
+## AUTH-001 · Kayıt + e-posta doğrulama + giriş/çıkış
+- **Tarih:** 2026-07-15
+- **Özet:** Supabase Auth ile tam kayıt/giriş/çıkış + e-posta doğrulama kapısı.
+  Merkezî Türkçe hata dönüşümü `AuthErrorMapper` (+`AuthFailure`) — ham Supabase/ağ
+  hataları kullanıcıya sızmaz (kayıtlı e-posta, hatalı giriş, doğrulanmamış e-posta,
+  zayıf şifre, hız sınırı, ağ, genel). Saf `AuthValidators` (e-posta/şifre ≥8/
+  şifre tekrar). `AuthRepository` arayüzü + `SupabaseAuthRepository`
+  (signUp/signIn/signOut/resend, `onAuthStateChange`'ten `AuthStatus` türetir;
+  emailConfirmedAt yoksa `unverified`). `authRepositoryProvider` +
+  `pendingVerificationEmailProvider`. GoRouter auth kapısı (`AppRoutes`,
+  `GoRouterRefreshStream`, `redirect`): doğrulanmamış → yalnızca `/verify-email`,
+  oturumsuz → yalnızca auth ekranları, ana uygulamaya yalnızca `authenticated`.
+  Ekranlar `LoginScreen`/`RegisterScreen`/`VerifyEmailScreen` ortak `AuthShell` ile
+  (Miyhav tasarım sistemi: pixel avatar, PrimaryButton/SecondaryButton/AppTextField,
+  tema renkleri). `MainShell` profil sekmesine "Çıkış Yap". Oturum kalıcılığı
+  supabase_flutter otomatik. **profiles migration'ı değiştirilmedi; yeni migration
+  oluşturulmadı** — mevcut `handle_new_user` trigger'ı profili kurar.
+- **Kararlar:** D-018 (auth yönlendirme kapısı; doğrulama hem client redirect hem
+  Dashboard "Confirm email" ile iki katmanlı).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → **34 test All passed** (AuthErrorMapper 8, AuthValidators 8,
+  auth akış yönlendirmesi + form doğrulama 5, mevcut config/tema/bootstrap/shell).
+- **Test borcu:** OPS-002 — gerçek Supabase Auth uçtan uca (kayıt→doğrulama
+  e-postası→giriş) canlı testi; bu ortamda egress engeli + cihaz yokluğu nedeniyle
+  yapılamadı, client mantığı sahte repo ile test edildi. Ayrıca "Confirm email"
+  Dashboard'da AÇIK olmalı (manuel).
+- **Commit:** `feat: add Supabase Auth (register, verify email, login/logout)`
+- **Durum:** done.
+
 ## SETUP-003 · Supabase istemci + ilk profiles migration
 - **Tarih:** 2026-07-14
 - **Özet:** `supabase_flutter` (2.16.0) eklendi. Merkezi, test edilebilir
@@ -23,10 +52,18 @@
   güncelleyememe, insert deny, case-insensitive username benzersizliği) TÜMÜ GEÇTİ.
 - **Not:** Testler tam Supabase yerine yerel PG 16 + minimal auth shim (`auth.uid()`,
   `authenticated` rolü) ile koştu; migration SQL'i gerçek ve davranış doğrulandı.
-  Gerçek Supabase projesine uygulanması kullanıcı projeyi bağladıktan sonra
-  (`supabase db push` / SQL editörü) yapılacak.
+- **Canlı doğrulama (2026-07-14):** Gerçek development Supabase projesi bağlandı
+  (URL + publishable/anon key yalnızca gitignored `config/dev.local.json`'da).
+  Migration gerçek projeye uygulandı; salt-okunur `supabase/checks/
+  verify_remote_profiles.sql` Bölüm 1'in **tüm kontrolleri OK** döndü (profiles
+  tablosu, 3 enum, generated kolon, default'lar, unique index, `handle_new_user`
+  + `profiles_before_update` fonksiyon/trigger'ları, RLS aktif, 2 politika).
+  Migration history baseline'ı açık borç olarak kaldı → **OPS-001**
+  (`docs/SUPABASE_MIGRATION_BASELINE.md`). Cloud ortamının egress'i
+  `*.supabase.co`'yu engellediğinden bağlantının in-app testi bu ortamda değil,
+  kullanıcı cihazı/CI'da yapılır.
 - **Commit:** `feat: add Supabase client bootstrap and profiles migration with RLS`
-- **Durum:** done.
+- **Durum:** done (şema canlı doğrulandı).
 
 ## DESIGN-001 · Tasarım sistemi (tema, font, bileşenler, alt navigasyon)
 - **Tarih:** 2026-07-14

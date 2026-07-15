@@ -91,12 +91,45 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   **Migration + RLS gerçek Postgres 16'da koşuldu** (auth shim ile):
   `supabase/tests/profiles_rls_test.sql` → 6 senaryo TÜMÜ GEÇTİ.
 - Manuel: Supabase projesi (URL + anon key) — kullanıcı (bkz. ENVIRONMENT_SETUP.md).
+- **Canlı doğrulama (2026-07-14):** Gerçek development Supabase projesi bağlandı
+  (URL + publishable/anon key → gitignored `config/dev.local.json`). Migration
+  gerçek projeye uygulandı ve `supabase/checks/verify_remote_profiles.sql`
+  Bölüm 1 kontrollerinin **tamamı OK** döndü (tablo, 3 enum, generated kolon,
+  default'lar, unique index, 2 fonksiyon, 2 trigger, RLS aktif, 2 politika).
+  Kalan: migration history baseline → **OPS-001** (bkz. Test Borcu). Cloud
+  geliştirme ortamının egress'i `*.supabase.co`'yu engellediğinden bağlantının
+  in-app canlı testi bu ortamda yapılamaz (kullanıcı cihazı/CI'da doğrulanır).
 - Bağımlılık: SETUP-002.
-- Durum: **done**.
+- Durum: **done** (şema canlı doğrulandı; history baseline OPS-001'de).
 
-## AUTH-001 · Kayıt + e-posta doğrulama + giriş/çıkış — todo
-## AUTH-002 · Şifre sıfırlama/değiştirme + e-posta değiştirme + Türkçe hata — todo
+## AUTH-001 · Kayıt + e-posta doğrulama + giriş/çıkış — **done**
+- Amaç: Supabase Auth ile kayıt, giriş, çıkış, e-posta doğrulama; doğrulanmamış
+  kullanıcı ana uygulamaya geçemez; ham hata yok → Türkçe.
+- Yapıldı: `AuthErrorMapper` (+`AuthFailure`) merkezî Türkçe hata dönüşümü;
+  `AuthValidators` (e-posta/şifre/şifre tekrar, saf + testli); `AuthRepository`
+  arayüzü + `SupabaseAuthRepository` (signUp/signIn/signOut/resend; `AuthStatus`
+  türetme); `authRepositoryProvider` + `pendingVerificationEmailProvider`;
+  GoRouter auth kapısı (`refreshListenable` + `redirect`, `AppRoutes`);
+  `LoginScreen`/`RegisterScreen`/`VerifyEmailScreen` + ortak `AuthShell`
+  (Miyhav tasarım sistemi: PrimaryButton/SecondaryButton/AppTextField/pixel
+  avatar); `MainShell` profil sekmesine "Çıkış Yap". Oturum kalıcılığı
+  supabase_flutter ile otomatik. **profiles migration'ına DOKUNULMADI; yeni
+  migration OLUŞTURULMADI** (mevcut `handle_new_user` trigger'ı profili kurar).
+- Kararlar: D-018 (auth yönlendirme kapısı).
+- Test yapıldı: `dart format` ✅ · `flutter analyze` (No issues) ✅ ·
+  `flutter test` → **34 test All passed** (hata mapper, validators, auth
+  yönlendirme akışı: oturumsuz→login, doğrulanmamış→verify, girişli→ana,
+  boş form Türkçe hata, başarılı giriş→ana). Canlı Supabase auth (gerçek kayıt/
+  doğrulama e-postası) bu ortamda test EDİLEMEDİ → bkz. Test Borcu OPS-002.
+- Manuel (kullanıcı, Supabase Dashboard): **Authentication → Sign In / Providers →
+  Email**: "Confirm email" **AÇIK** (doğrulama zorunlu); **URL Configuration →
+  Site URL / Redirect URLs** uygulama/deep-link'e göre ayarlanır. Türkçe e-posta
+  şablonları EMAIL-001'de.
 - Bağımlılık: SETUP-003.
+- Durum: **done** (canlı auth doğrulaması OPS-002'de).
+
+## AUTH-002 · Şifre sıfırlama/değiştirme + e-posta değiştirme + Türkçe hata — todo
+- Bağımlılık: AUTH-001.
 
 ## PROFILE-001 · Profil görüntüleme/düzenleme + username uniqueness — todo
 - İçerik: profiles CRUD (kritik alanlar hariç), username_normalized unique, foto.
@@ -176,6 +209,14 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   çıktısında sürüm hem Local hem Remote'ta görünür ve `db diff` fark üretmez.
   Ayrıntılı plan: `docs/SUPABASE_MIGRATION_BASELINE.md`. **Kural:** repair
   yapılmadan `supabase db push` çalıştırılmaz.
+- **OPS-002 · Canlı Supabase Auth doğrulaması (AUTH-001):** Kayıt → doğrulama
+  e-postası → doğrulama → giriş → çıkış akışının gerçek Supabase projesinde uçtan
+  uca testi bu geliştirme ortamında yapılamadı (egress `*.supabase.co`'yu engelliyor
+  + Android SDK/gerçek cihaz yok). Client mantığı ve yönlendirme widget testleriyle
+  doğrulandı (sahte repo). **Nasıl kapatılır:** (a) Dashboard'da "Confirm email"
+  AÇIK; (b) gerçek cihaz/emülatör veya CI'da `--dart-define-from-file=config/
+  dev.local.json` ile uygulama çalıştırılıp gerçek e-posta ile kayıt/doğrulama/
+  giriş/çıkış denenir; doğrulanmadan ana ekrana geçilemediği görülür.
 - **TD-001 · Android debug build (SETUP-001):** Bu geliştirme ortamında Android SDK
   yok ve `dl.google.com` organizasyon egress politikası ile engelli (403), bu yüzden
   `sdkmanager`/`build-tools` indirilemiyor ve gerçek `flutter build apk --debug`
@@ -187,5 +228,5 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**AUTH-001** (kayıt + e-posta doğrulama + giriş/çıkış). Ayrı ve onaylı bir adımda
-başlanacak; SETUP-003 burada durur.
+**AUTH-002** (şifre sıfırlama/değiştirme + e-posta değiştirme + Türkçe hata).
+Ayrı ve onaylı bir adımda başlanacak; AUTH-001 burada durur.
