@@ -181,9 +181,37 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 - Bağımlılık: AUTH-001.
 - Durum: **done**.
 
-## PRIVACY-001 · Profil gizliliği + public_profiles view/RPC — todo
-- İçerik: profile_visibility, güvenli projeksiyon, RLS politikaları.
+## PRIVACY-001 · Profil gizliliği + public_profiles view/RPC — **done**
+- Amaç: 3 seviyeli gizlilik modelini (public/friends_only/private) backend+RLS
+  seviyesinde uygulamak. (Arkadaşlık/keşfet/arama EKRANI kapsam dışı.)
+- Yapıldı: **Yeni migration** `20260715120000_privacy_discovery.sql` (mevcut
+  profiles migration'ına DOKUNULMADI): (a) full-profile SELECT'e `profiles_select_public`
+  eklendi — public+aktif profiller aktif authenticated'a açık; friends_only/private
+  yalnız sahibi; (b) `is_account_active(uuid)` güvenli helper; (c) **SECURITY DEFINER**
+  keşif projeksiyonu `public_profiles` view (yalnız 5 güvenli kolon; filtre
+  `visibility IN (public,friends_only) AND account_status='active'`); (d)
+  `search_profiles(text)` SECURITY DEFINER RPC (username prefix, self hariç, private/
+  inaktif hariç, limit 30) + `username_normalized text_pattern_ops` prefix index.
+  Grants: view/RPC yalnız authenticated; anon revoke. Deny-by-default korundu; RLS
+  gevşetilmedi; before_update trigger + INSERT/DELETE kapalılığı bozulmadı.
+- Ertelenen: friends_only **tam profil** erişimi (arkadaşa) → friendships altyapısı
+  yok, deny-by-default bırakıldı; policy FRIEND görevinde eklenecek (D-022 / matris ¹).
+- Flutter temeli (UI YOK): `DiscoveryProfile` modeli + `DiscoveryRepository` /
+  `SupabaseDiscoveryRepository` (`search_profiles` RPC) + provider. Prefix/exact
+  arama ve güvenlik yaklaşımı dokümante edildi.
+- Kararlar: D-005 rafine → **D-022** (keşif projeksiyonu SECURITY DEFINER, gerekçesiyle).
+- Test yapıldı: **Gerçek PostgreSQL 16** RLS testleri koştu (shim + migration'lar +
+  `profiles_rls_test.sql` + `privacy_rls_test.sql`, runner `run_local_tests.sh`) →
+  **profiles + PRIVACY-001 16 senaryo TÜMÜ GEÇTİ** (private read, public read,
+  inactive gizli, discovery içerir/hariç, yalnız izinli kolonlar, membership/status
+  discovery'de yok, başkası update edemez, owner membership/status değiştiremez,
+  case-insensitive unique, friends_only tam profil deny). Flutter: `dart format` ✅ ·
+  `flutter analyze` (No issues) ✅ · `flutter test` → **68 test** ✅ (DiscoveryProfile
+  parse dahil).
+- Manuel: Yeni migration'ın gerçek Supabase'e uygulanması → bkz. OPS-005 (OPS-001
+  baseline'a bağlı).
 - Bağımlılık: PROFILE-001.
+- Durum: **done** (canlı Supabase'e uygulama OPS-005'te).
 
 ## PET-001 · Pet ekleme/düzenleme/silme (özel alanlar) — todo
 ## PET-002 · Sosyal pet görünümü (pet_public_view) — todo
@@ -271,6 +299,15 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   **Nasıl kapatılır:** (a) Supabase Dashboard'da Redirect URL'ler eklenir; (b)
   gerçek cihaz/emülatörde kayıt → doğrulama linki → uygulama açılır → ana ekran;
   (c) şifre sıfırlama linki → yeni şifre ekranı açılır → güncelle → giriş.
+- **OPS-005 · Yeni gizlilik migration'ının canlıya uygulanması (PRIVACY-001):**
+  `20260715120000_privacy_discovery.sql` gerçek PostgreSQL 16'da test edildi ama
+  **canlı Supabase'e uygulanmadı** (egress `*.supabase.co` engelli + OPS-001 migration
+  history baseline'ı hâlâ açık). **Nasıl kapatılır (SIRA ÖNEMLİ):** (a) önce OPS-001
+  baseline repair yapılır (`supabase migration repair --status applied 20260714093000`);
+  (b) sonra `supabase db push` YALNIZCA yeni migration'ı (`20260715120000`) uygular —
+  baseline'dan önce push ÇALIŞTIRILMAZ, eski migration tekrar uygulanmaz. Detay:
+  `docs/SUPABASE_MIGRATION_BASELINE.md`. Bu migration'ı "canlıya uygulandı" diye
+  raporlama; yalnızca yerel doğrulandı.
 - **TD-001 · Android debug build (SETUP-001):** Bu geliştirme ortamında Android SDK
   yok ve `dl.google.com` organizasyon egress politikası ile engelli (403), bu yüzden
   `sdkmanager`/`build-tools` indirilemiyor ve gerçek `flutter build apk --debug`
@@ -282,5 +319,5 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**PRIVACY-001** (profil gizliliği + public_profiles view/RPC). Ayrı ve onaylı bir
-adımda başlanacak; PROFILE-001 burada durur.
+**PET-001** (pet ekleme/düzenleme/silme — özel alanlar). Ayrı ve onaylı bir
+adımda başlanacak; PRIVACY-001 burada durur.

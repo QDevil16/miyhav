@@ -1,5 +1,38 @@
 # COMPLETED — Tamamlanan Görevler
 
+## PRIVACY-001 · Profil gizliliği + güvenli keşif projeksiyonu (RLS)
+- **Tarih:** 2026-07-15
+- **Özet:** 3 seviyeli gizlilik modeli backend+RLS seviyesinde uygulandı (UI/arkadaşlık/
+  keşfet ekranı kapsam dışı). **Yeni migration** `20260715120000_privacy_discovery.sql`
+  (mevcut `20260714093000_create_profiles.sql` DEĞİŞTİRİLMEDİ): full-profile SELECT'e
+  `profiles_select_public` (public+aktif → aktif authenticated okur; friends_only/private
+  yalnız sahibi), `is_account_active(uuid)` güvenli helper, **SECURITY DEFINER** keşif
+  projeksiyonu `public_profiles` view (yalnız 5 güvenli kolon: id/username/display_name/
+  profile_photo_path/profile_visibility; filtre `visibility IN (public,friends_only) AND
+  account_status='active'`), `search_profiles(text)` SECURITY DEFINER RPC (username prefix,
+  self hariç, private/inaktif hariç, limit 30) + `username_normalized text_pattern_ops`
+  index. anon revoke, authenticated grant; deny-by-default + before_update trigger +
+  INSERT/DELETE kapalılığı korundu; RLS gevşetilmedi; service_role kullanılmadı.
+- **Ürün kuralı doğrulandı:** private aramada/keşifte bulunmaz; public+friends_only
+  bulunabilir; ama **"bulunabilirlik ≠ tam profil"** — friends_only tam profili arkadaş
+  olmayana kapalı. friends_only *tam profil (arkadaşa)* erişimi friendships altyapısı
+  gerektirdiğinden **ertelendi (deny-by-default)** → FRIEND görevi (D-022).
+- **Flutter temeli (UI YOK):** `DiscoveryProfile` modeli + `DiscoveryRepository`/
+  `SupabaseDiscoveryRepository` (`search_profiles` RPC) + provider — sonraki DISCOVERY
+  görevleri için güvenli veri erişim temeli.
+- **Kararlar:** D-005 rafine → **D-022** (keşif projeksiyonu neden SECURITY DEFINER;
+  SECURITY INVOKER view friends_only'i gösterirken tam profili sızdırırdı — Firestore
+  hatası). `docs/PRIVACY_MATRIX.md` uygulanan davranışla hizalandı.
+- **SQL/RLS testi (gerçekten koştu):** Yerel **PostgreSQL 16** üzerinde
+  `run_local_tests.sh` ile shim + iki migration + `profiles_rls_test.sql` +
+  `privacy_rls_test.sql` → **profiles + PRIVACY-001 (16 senaryo) TÜMÜ GEÇTİ**. Flutter:
+  `dart format` ✅ · `flutter analyze` → *No issues found* ✅ · `flutter test` →
+  **68 test All passed**.
+- **Test borcu:** OPS-005 — yeni migration'ın canlı Supabase'e uygulanması (OPS-001
+  baseline repair'inden SONRA; bu ortamdan Supabase'e erişim yok).
+- **Commit:** `feat: add profile privacy RLS and secure discovery projection (PRIVACY-001)`
+- **Durum:** done (canlı uygulama OPS-005'te).
+
 ## PROFILE-001 · Kendi profil görüntüleme/düzenleme + username uniqueness
 - **Tarih:** 2026-07-15
 - **Özet:** Kullanıcının yalnızca kendi profilini görüntülemesi/düzenlemesi tamamlandı

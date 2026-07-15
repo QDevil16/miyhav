@@ -23,6 +23,33 @@ Notlar:
 - Pasif/askıya alınmış/silinmiş (suspended/deleted, aktif değil) hesaplar hiçbir
   aramada/keşifte görünmez.
 
+## Uygulanan Erişim Matrisi (PRIVACY-001)
+Aşağıdaki tablo **şu an kod/RLS ile fiilen uygulanan** davranıştır (gerçek
+PostgreSQL 16 RLS testleriyle doğrulandı). Satırlar erişimi isteyen kişiyi,
+sütunlar veri gruplarını gösterir.
+
+| Erişen ↓ / Veri → | Sınırlı discovery | Tam profil | E-posta/auth | Pet sosyal | Pet sağlık |
+|---|---|---|---|---|---|
+| Kendi profili | ✅ | ✅ | (auth kendi) | (ileride) | ✅ yalnız sahip |
+| Public (aktif) kullanıcı → başkası | ✅ | ✅ (public+aktif) | ❌ | (ileride) | ❌ |
+| Friends-only'ye **arkadaş** | ✅ | ⛔ ertelendi¹ | ❌ | (ileride) | ❌ |
+| Friends-only'ye **arkadaş olmayan** | ✅ (sınırlı) | ❌ | ❌ | (ileride) | ❌ |
+| Private kullanıcı → başkası | ❌ | ❌ | ❌ | (ileride) | ❌ |
+| Discovery projection (public_profiles/search) | ✅ 5 kolon² | ❌ | ❌ | ❌ | ❌ |
+
+¹ **Ertelendi:** friends_only *tam profil* erişimi arkadaşlık altyapısı (friendships
+tablosu/`are_friends`) gerektirir; henüz migration yok → **deny-by-default**. Policy
+FRIEND görevinde eklenecek. Şu an friends_only tam profili yalnızca sahibine açık.
+² Discovery projeksiyonu yalnızca `id, username, display_name, profile_photo_path,
+profile_visibility` döndürür; `membership_type/account_status/e-posta/short_bio/city/
+username_normalized` gibi alanlar projeksiyonda YOKTUR. Kaynak filtresi:
+`profile_visibility IN ('public','friends_only') AND account_status='active'` (private
+ve aktif olmayanlar hariç). **Aramada bulunma ≠ tam profil erişimi.**
+
+Pet sosyal/pet sağlık sütunları: pet tabloları henüz yok (PET görevleri). Ürün/
+güvenlik kuralı: **pet sağlık verisi her koşulda yalnızca pet sahibine ait özel
+veridir** — hiçbir discovery/sosyal/arkadaş/analytics katmanına çıkmaz.
+
 ## Post Gizliliği
 Gerçek görünürlük = en kısıtlayıcı birleşim: profil gizliliği ∧ post gizliliği ∧
 arkadaşlık ∧ engel yok ∧ hesap aktif ∧ moderation=visible.

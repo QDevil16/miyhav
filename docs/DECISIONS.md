@@ -29,11 +29,25 @@ BEFORE UPDATE trigger (`profiles_before_update`) ile eski değerine sabitlenir;
 authenticated'a açılmaz — yalnızca `handle_new_user` trigger'ı oluşturur. Üyelik/
 durum değişimleri ileride ayrı güvenli SECURITY DEFINER RPC'lerle yapılacaktır.
 
-## D-005 · Arama/keşif projeksiyonu
-SECURITY INVOKER view (`public_profiles`) + SECURITY INVOKER RPC (`search_profiles`,
-`discover_profiles`). Ayrı discovery projection tablosu MVP'de yok. Gerekçe:
-güvenlik + sadelik + RLS uyumu; ayrı tablo senkron yükü getirir, gerçekten
-gerekmedikçe eklenmez.
+## D-005 · Arama/keşif projeksiyonu (PRIVACY-001'de rafine edildi → D-022)
+~~SECURITY INVOKER view + RPC.~~ Uygulamada güvenlik nedeniyle **SECURITY DEFINER**
+projeksiyona geçildi (bkz. D-022). Ayrı discovery projection tablosu hâlâ yok
+(view + RPC yeterli).
+
+## D-022 · Keşif projeksiyonu SECURITY DEFINER (D-005 rafine, PRIVACY-001)
+Bağlam: `friends_only` profiller **aramada bulunabilmeli** ama **tam profilleri**
+arkadaş olmayana açılmamalı. SECURITY INVOKER view bunu yapamaz: view'in friends_only
+satırını döndürebilmesi için `profiles` full-profile SELECT RLS'inin o satırı açması
+gerekir; RLS satır-düzeyi olduğundan bu, `select * from profiles` ile TÜM kolonların
+(tam profil) sızması demektir (eski Firestore hatası). Seçim: keşif projeksiyonu
+`public_profiles` **SECURITY DEFINER view** (kolon allow-list: id, username,
+display_name, profile_photo_path, profile_visibility) + `search_profiles(text)`
+SECURITY DEFINER RPC (aynı 5 kolon, username prefix). Full-profile RLS sıkı kalır
+(own + public-aktif; friends_only/private → own). Böylece "bulunabilirlik" ile "tam
+profil erişimi" bağımsızca zorlanır. Gerekçe: allow-list'li definer projeksiyon,
+sınırlı veriyi güvenle açarken tam profili korur; hassas kolonlar (e-posta/üyelik/
+durum/sağlık) projeksiyonda hiç bulunmaz. friends_only *tam profil* erişimi friendship
+altyapısına bağlı olduğundan FRIEND görevine ertelendi (deny-by-default).
 
 ## D-006 · Arkadaşlık kabulü ve engelleme
 Atomik RPC (`accept_friend_request`, `block_user` vb.) + unique/check constraint +
