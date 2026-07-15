@@ -122,6 +122,10 @@ begin
   -- 'bora' → BoraFr (friends_only) bulunur (keşifte bulunabilir)
   select count(*) into c_pub from public.search_profiles('bora') where id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
   assert c_pub=1, 'search_profiles friends_only profili döndürmedi (keşifte bulunmalı)';
+  -- Wildcard suistimali: '%' LİTERAL kabul edilmeli → hiçbir username '%' ile
+  -- başlamadığından 0 sonuç (kaçırma çalışmazsa TÜM profiller dönerdi).
+  select count(*) into c_self from public.search_profiles('%');
+  assert c_self=0, 'search_profiles wildcard (%) suistimaline açık (LIKE kaçırma yok)';
 end $$;
 
 -- ---------- 12) Başka kullanıcı profile update yapamaz ----------

@@ -107,7 +107,12 @@ as $$
     and p.id <> (select auth.uid())
     and p.username_normalized is not null
     and btrim(coalesce(search, '')) <> ''
-    and p.username_normalized like lower(btrim(search)) || '%'
+    -- LIKE meta-karakterleri (\ % _) kaçırılır → kullanıcı girdisi LİTERAL prefix
+    -- olarak eşleşir (wildcard ile enumerasyon engellenir; username'ler '_'
+    -- içerebildiği için doğruluk da sağlanır). Eklenen sondaki '%' tek wildcard'dır.
+    and p.username_normalized like
+        replace(replace(replace(lower(btrim(search)), '\', '\\'), '%', '\%'), '_', '\_')
+        || '%' escape '\'
   order by p.username_normalized
   limit 30;
 $$;
