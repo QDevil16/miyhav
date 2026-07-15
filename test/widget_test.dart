@@ -3,12 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:miyhav/app/app.dart';
+import 'package:miyhav/features/auth/application/auth_providers.dart';
+import 'package:miyhav/features/auth/data/auth_repository.dart';
+
+import 'support/fake_auth_repository.dart';
 
 void main() {
-  testWidgets('MiyhavApp açılır, tema ve alt navigasyon render edilir', (
+  testWidgets('Girişli kullanıcıda tema ve alt navigasyon render edilir', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: MiyhavApp()));
+    final FakeAuthRepository auth = FakeAuthRepository(
+      AuthStatus.authenticated,
+      email: 'test@miyhav.app',
+    );
+    addTearDown(auth.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[authRepositoryProvider.overrideWithValue(auth)],
+        child: const MiyhavApp(),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Seçili sekme başlığı (app bar + alt navigasyon etiketi) görünür.
@@ -20,10 +35,10 @@ void main() {
     );
     expect(app.theme?.textTheme.bodyLarge?.fontFamily, 'Jost');
 
-    // Alt navigasyonda sekme geçişi çalışıyor (seçili olmayan sekme ikonla).
+    // Alt navigasyonda sekme geçişi çalışıyor.
     await tester.tap(find.byIcon(Icons.pets_rounded));
     await tester.pumpAndSettle();
     expect(find.text('Henüz pet eklemedin'), findsOneWidget);
-    expect(find.text('Petlerim'), findsWidgets); // seçilince etiket görünür
+    expect(find.text('Petlerim'), findsWidgets);
   });
 }

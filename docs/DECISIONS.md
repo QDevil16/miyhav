@@ -92,6 +92,18 @@ desenlerinden `CustomPainter` ile çizilir (`PetPixelAvatar`). Gerekçe: telifsi
 özgün, ölçeklenebilir, ağ bağımlılığı yok. Gerçek foto yüklenene kadar kullanılır;
 yeni tür desenleri kolayca eklenir.
 
+## D-018 · Auth yönlendirme kapısı (AUTH-001)
+Oturum/doğrulama durumu tek bir `AuthStatus` (unauthenticated / unverified /
+authenticated) ile modellenir; `AuthRepository` bunu Supabase
+`onAuthStateChange`'ten türetir. GoRouter `refreshListenable` (auth stream köprüsü)
++ `redirect` ile: doğrulanmamış kullanıcı yalnızca `/verify-email`, oturumsuz
+kullanıcı yalnızca `/login,/register,/verify-email` görebilir; ana uygulamaya
+(`/`) yalnızca `authenticated` erişir. E-posta doğrulama zorunluluğu ayrıca
+Supabase Dashboard'da **"Confirm email" AÇIK** olmasına bağlıdır (manuel ayar).
+Gerekçe: "kullanıcı doğrulanmadan ana uygulamaya geçmesin" kuralını hem client
+yönlendirmesi hem sunucu ayarıyla iki katmanlı güvence altına almak. Ham Supabase
+hataları `AuthErrorMapper` ile merkezî Türkçe mesaja çevrilir (kural 6).
+
 ## Retention notu
 Şikâyet/moderasyon (reports, content_reports) verisi hesap silmede tamamen
 silinmeyebilir (kötüye kullanım önleme). Kesin retention politikası ilgili
