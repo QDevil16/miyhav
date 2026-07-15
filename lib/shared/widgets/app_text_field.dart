@@ -16,6 +16,7 @@ class AppTextField extends StatefulWidget {
     this.prefixIcon,
     this.errorText,
     this.onChanged,
+    this.maxLines = 1,
   });
 
   final String? label;
@@ -26,6 +27,9 @@ class AppTextField extends StatefulWidget {
   final IconData? prefixIcon;
   final String? errorText;
   final ValueChanged<String>? onChanged;
+
+  /// Çok satırlı giriş için (ör. biyografi). Şifre alanında yok sayılır.
+  final int maxLines;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -52,6 +56,7 @@ class _AppTextFieldState extends State<AppTextField> {
           controller: widget.controller,
           obscureText: _hidden,
           keyboardType: widget.keyboardType,
+          maxLines: widget.obscure ? 1 : widget.maxLines,
           onChanged: widget.onChanged,
           style: AppTypography.body.copyWith(color: scheme.onSurface),
           decoration: InputDecoration(

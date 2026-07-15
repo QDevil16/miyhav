@@ -155,9 +155,31 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 - Bağımlılık: AUTH-001.
 - Durum: **done** (native deep link cihaz doğrulaması OPS-004'te).
 
-## PROFILE-001 · Profil görüntüleme/düzenleme + username uniqueness — todo
-- İçerik: profiles CRUD (kritik alanlar hariç), username_normalized unique, foto.
+## PROFILE-001 · Profil görüntüleme/düzenleme + username uniqueness — **done**
+- Amaç: Kullanıcının yalnızca KENDİ profilini görüntülemesi/düzenlemesi (sosyal/
+  arkadaş/keşfet/pet profili KAPSAM DIŞI).
+- Yapıldı: `Profile` modeli + `ProfileVisibility` enum (wire↔Türkçe etiket/açıklama);
+  `ProfileRepository` + `SupabaseProfileRepository` (fetchMyProfile/updateMyProfile;
+  id her zaman auth oturumundan; `buildProfileUpdate` yalnızca düzenlenebilir alanlar);
+  `profileRepositoryProvider` + `myProfileProvider` (auth değişince tazelenir);
+  merkezî Türkçe hata `ProfileErrorMapper` (23505→"Bu kullanıcı adı zaten kullanılıyor.");
+  `ProfileValidators` (username 3-30 [A-Za-z0-9_] opsiyonel, display≤60, bio≤160,
+  city≤80). Ekranlar: `ProfileScreen` (MainShell profil sekmesi — DefaultProfileAvatar,
+  ad, @kullanıcıadı/"Kullanıcı adı belirlenmedi", bio/şehir yalnızca varsa, gizlilik
+  etiketi, Profili Düzenle, Çıkış Yap; loading/error+retry) ve `ProfileEditScreen`
+  (5 alan + bio sayacı + gizlilik seçici; `/profile-edit`). `AppTextField`'a `maxLines`.
+- Profil fotoğrafı: **upload YOK** (storage/seçici/R2 bağlanmadı); UI'da
+  DefaultProfileAvatar; `profile_photo_path` update payload'una konmaz → korunur.
+- SQL/RLS etkisi: **yok** (mevcut şema + RLS yeterli; yeni migration yok, profiles
+  migration'ına dokunulmadı). Benzersizlik DB unique index ile; RLS yalnızca kendi
+  satırını okut/güncelletir.
+- Test yapıldı: `dart format` ✅ · `flutter analyze` (No issues) ✅ · `flutter test`
+  → **66 test All passed** (model parse, gizlilik etiketleri, username/bio/city
+  validasyon, buildProfileUpdate kritik alan hariç, 23505→Türkçe, loading, error+retry,
+  repo yalnızca current id + provider tazeleme, düzenleme kaydı). Auth testleri korunur.
+- Manuel: yok.
 - Bağımlılık: AUTH-001.
+- Durum: **done**.
 
 ## PRIVACY-001 · Profil gizliliği + public_profiles view/RPC — todo
 - İçerik: profile_visibility, güvenli projeksiyon, RLS politikaları.
@@ -260,5 +282,5 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**PROFILE-001** (profil görüntüleme/düzenleme + username uniqueness). Ayrı ve
-onaylı bir adımda başlanacak; AUTH-002 burada durur.
+**PRIVACY-001** (profil gizliliği + public_profiles view/RPC). Ayrı ve onaylı bir
+adımda başlanacak; PROFILE-001 burada durur.

@@ -130,6 +130,19 @@ gösterilir, şifre güncellenince oturum kapatılır. Tekrar işlenme (duplicat
 link) idempotenttir (recovery guard + declarative GoRouter redirect). Gerekçe:
 şartname mobil-only; güvenli, öngörülebilir ve platformlar arası tutarlı callback.
 
+## D-021 · Profil okuma/yazma modeli (PROFILE-001)
+Kullanıcının kendi profili `ProfileRepository` (Supabase impl) üzerinden okunur/
+güncellenir; UI'a Supabase istemcisi sızmaz. Güncelleme yalnızca düzenlenebilir
+alanları içeren payload ile ve id her zaman auth oturumundan (`.eq('id', uid)`)
+yapılır; kritik alanlar (membership_type, account_status, id, created_at,
+username_normalized) payload'a hiç konmaz — DB'de BEFORE UPDATE trigger + RLS ile de
+korunur. Kullanıcı adı benzersizliği yalnızca client ön kontrolüne bırakılmaz; asıl
+güvence `username_normalized` unique index'idir, ihlal (23505) Türkçe mesaja çevrilir.
+Profil satırı yoksa sahte profil üretilmez → "ulaşılamıyor" mesajı. Bu görev yeni
+migration/RLS getirmez (mevcut şema yeterli). Profil fotoğrafı upload'u bu görevde
+YOK (storage ayrı görevde); `profile_photo_path` korunur. Not: profile_visibility
+yalnızca profilin kendi tercihidir; arama/keşif (discovery) görünürlüğü ayrı konudur.
+
 ## Retention notu
 Şikâyet/moderasyon (reports, content_reports) verisi hesap silmede tamamen
 silinmeyebilir (kötüye kullanım önleme). Kesin retention politikası ilgili

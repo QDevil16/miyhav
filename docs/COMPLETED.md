@@ -1,5 +1,38 @@
 # COMPLETED — Tamamlanan Görevler
 
+## PROFILE-001 · Kendi profil görüntüleme/düzenleme + username uniqueness
+- **Tarih:** 2026-07-15
+- **Özet:** Kullanıcının yalnızca kendi profilini görüntülemesi/düzenlemesi tamamlandı
+  (sosyal/arkadaş/keşfet/pet profili kapsam dışı). `Profile` modeli + `ProfileVisibility`
+  enum (private/friends_only/public ↔ Sadece Ben/Sadece Arkadaşlar/Herkese Açık +
+  kısa açıklamalar). Veri katmanı: `ProfileRepository` arayüzü + `SupabaseProfileRepository`
+  (fetchMyProfile/updateMyProfile; id daima auth oturumundan `.eq('id', uid)`; saf
+  `buildProfileUpdate` yalnızca düzenlenebilir alanlar). Riverpod: `profileRepositoryProvider`,
+  `myProfileProvider` (auth durumu değişince tazelenir), güncelleme sonrası `invalidate`.
+  Merkezî Türkçe hata `ProfileErrorMapper` (PostgREST 23505 → "Bu kullanıcı adı zaten
+  kullanılıyor.", ham hata sızmaz). `ProfileValidators` (username 3-30 [A-Za-z0-9_]
+  opsiyonel, Türkçe/boşluk yok; display≤60; bio≤160; city≤80; trim). Ekranlar:
+  `ProfileScreen` (DefaultProfileAvatar, görünen ad/"İsim eklenmemiş", @kullanıcıadı/
+  "Kullanıcı adı belirlenmedi", bio+şehir yalnızca doluysa, gizlilik etiketi, Profili
+  Düzenle, Çıkış Yap; loading + hata/retry — sahte profil üretmez, "Profil bilgilerine
+  şu anda ulaşılamıyor."), `ProfileEditScreen` (5 alan + canlı bio sayacı + gizlilik
+  seçici, Türkçe validasyon/loading/başarı geri bildirimi). `AppTextField`'a `maxLines`
+  eklendi; MainShell profil sekmesi gerçek profile bağlandı; `/profile-edit` rotası.
+  Tasarım sistemi (Jost, krem/taupe/cacao/coral, AppCard/Buttons/AppTextField,
+  DefaultProfileAvatar) korundu; pixel-art/hayvan çizimi/gradient yok.
+- **Profil fotoğrafı:** upload sistemi kurulmadı (storage/seçici/R2 bağlanmadı);
+  `profile_photo_path` update payload'una konmaz → mevcut değer korunur.
+- **Kararlar:** D-021 (profil okuma/yazma modeli).
+- **SQL/RLS:** değişmedi; yeni migration YOK (mevcut şema + RLS yeterli — benzersizlik
+  DB unique index, RLS yalnızca kendi satırı select/update).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → **66 test All passed** (model parse, gizlilik etiketleri 3, username
+  validasyon 6, bio/city/display uzunluk, buildProfileUpdate kritik-alan-hariç, 23505→
+  Türkçe + ağ/genel, loading, error+retry, repo current-id + provider tazeleme, düzenleme
+  kaydı; mevcut auth/tema/config testleri korunur).
+- **Commit:** `feat: add own-profile view and edit (PROFILE-001)`
+- **Durum:** done.
+
 ## AUTH-002 · Şifre sıfırlama + mobil deep link callback + e-posta değiştirme
 - **Tarih:** 2026-07-15
 - **Özet:** Şifremi unuttum → şifre sıfırlama akışı ve mobil deep link callback'leri

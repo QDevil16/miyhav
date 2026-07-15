@@ -10,6 +10,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/auth/presentation/verify_email_screen.dart';
+import '../../features/profile/presentation/profile_edit_screen.dart';
 import 'auth_router_state.dart';
 
 /// Rota yolları (tek merkez).
@@ -20,6 +21,7 @@ abstract final class AppRoutes {
   static const String verifyEmail = '/verify-email';
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
+  static const String profileEdit = '/profile-edit';
 
   /// Oturum açmamış kullanıcıya izin verilen yollar. (reset-password yalnızca
   /// şifre kurtarma modunda erişilebilir; burada yer almaz.)
@@ -105,6 +107,12 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((ref) {
         name: 'resetPassword',
         builder: (BuildContext context, GoRouterState state) =>
             const ResetPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profileEdit,
+        name: 'profileEdit',
+        builder: (BuildContext context, GoRouterState state) =>
+            const ProfileEditScreen(),
       ),
     ],
   );
