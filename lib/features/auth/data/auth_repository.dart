@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/errors/auth_error_mapper.dart';
 
 /// Kullanıcının oturum + e-posta doğrulama durumu (yönlendirme için sadeleştirilir).
@@ -23,6 +24,24 @@ enum SignUpOutcome {
   signedIn,
 }
 
+/// Yönlendirme için önemli auth olay türleri (deep link callback'leri dahil).
+enum AuthEventKind {
+  /// Şifre sıfırlama bağlantısı ile gelen kurtarma oturumu (normal giriş DEĞİL).
+  passwordRecovery,
+
+  /// Oturum açıldı (giriş veya e-posta doğrulama deep link'i).
+  signedIn,
+
+  /// Oturum kapandı.
+  signedOut,
+
+  /// Kullanıcı güncellendi (ör. şifre/e-posta değişimi).
+  userUpdated,
+
+  /// Diğer (initial session, token refresh vb.).
+  other,
+}
+
 /// Kimlik doğrulama işlemleri için soyut arayüz.
 ///
 /// Ekranlar/servisler yalnızca bu arayüze bağlanır; testlerde sahte bir uygulama
@@ -36,6 +55,9 @@ abstract interface class AuthRepository {
 
   /// Durum değişimlerini yayınlar (GoRouter yenilemesi için).
   Stream<AuthStatus> statusChanges();
+
+  /// Auth olaylarını yayınlar (şifre kurtarma deep link'i tespiti için).
+  Stream<AuthEventKind> authEvents();
 
   /// E-posta + şifre ile kayıt.
   Future<SignUpOutcome> signUp({
@@ -51,6 +73,15 @@ abstract interface class AuthRepository {
 
   /// Doğrulama e-postasını yeniden gönder.
   Future<void> resendVerification(String email);
+
+  /// Şifre sıfırlama bağlantısı gönder (deep link callback ile döner).
+  Future<void> sendPasswordReset(String email);
+
+  /// Aktif (kurtarma veya normal) oturumda yeni şifreyi ayarla.
+  Future<void> updatePassword(String newPassword);
+
+  /// Aktif oturumda e-posta adresini değiştir (yeni adrese onay gönderilir).
+  Future<void> updateEmail(String newEmail);
 }
 
 /// [AuthRepository]'nin Supabase Auth uygulaması.
@@ -75,10 +106,29 @@ class SupabaseAuthRepository implements AuthRepository {
   Stream<AuthStatus> statusChanges() =>
       _auth.onAuthStateChange.map((AuthState s) => _statusFrom(s.session));
 
+  @override
+  Stream<AuthEventKind> authEvents() =>
+      _auth.onAuthStateChange.map((AuthState s) => _eventFrom(s.event));
+
   static AuthStatus _statusFrom(Session? session) {
     if (session == null) return AuthStatus.unauthenticated;
     final bool confirmed = session.user.emailConfirmedAt != null;
     return confirmed ? AuthStatus.authenticated : AuthStatus.unverified;
+  }
+
+  static AuthEventKind _eventFrom(AuthChangeEvent event) {
+    switch (event) {
+      case AuthChangeEvent.passwordRecovery:
+        return AuthEventKind.passwordRecovery;
+      case AuthChangeEvent.signedIn:
+        return AuthEventKind.signedIn;
+      case AuthChangeEvent.signedOut:
+        return AuthEventKind.signedOut;
+      case AuthChangeEvent.userUpdated:
+        return AuthEventKind.userUpdated;
+      default:
+        return AuthEventKind.other;
+    }
   }
 
   @override
@@ -90,6 +140,8 @@ class SupabaseAuthRepository implements AuthRepository {
       final AuthResponse res = await _auth.signUp(
         email: email.trim(),
         password: password,
+        // E-posta doğrulama bağlantısı uygulamayı bu deep link ile açar.
+        emailRedirectTo: AppConfig.loginCallbackUrl,
       );
       final bool confirmed =
           res.session != null && res.user?.emailConfirmedAt != null;
@@ -122,7 +174,44 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<void> resendVerification(String email) async {
     try {
-      await _auth.resend(type: OtpType.signup, email: email.trim());
+      await _auth.resend(
+        type: OtpType.signup,
+        email: email.trim(),
+        emailRedirectTo: AppConfig.loginCallbackUrl,
+      );
+    } catch (error) {
+      throw AuthErrorMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      await _auth.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: AppConfig.resetPasswordCallbackUrl,
+      );
+    } catch (error) {
+      throw AuthErrorMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _auth.updateUser(UserAttributes(password: newPassword));
+    } catch (error) {
+      throw AuthErrorMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> updateEmail(String newEmail) async {
+    try {
+      await _auth.updateUser(
+        UserAttributes(email: newEmail.trim()),
+        emailRedirectTo: AppConfig.loginCallbackUrl,
+      );
     } catch (error) {
       throw AuthErrorMapper.map(error);
     }

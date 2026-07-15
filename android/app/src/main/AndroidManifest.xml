@@ -24,6 +24,17 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Supabase Auth deep link callback'leri (yalnızca mobil; web yok).
+                 E-posta doğrulama: com.miyhav.app://login-callback/
+                 Şifre sıfırlama:   com.miyhav.app://reset-password/
+                 Değerler AppConfig ile aynıdır (tek merkez). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="com.miyhav.app" android:host="login-callback"/>
+                <data android:scheme="com.miyhav.app" android:host="reset-password"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

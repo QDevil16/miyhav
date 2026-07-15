@@ -128,8 +128,32 @@ ANDROID-001 → IOS-001 → RELEASE-001.
 - Bağımlılık: SETUP-003.
 - Durum: **done** (canlı auth doğrulaması OPS-002'de).
 
-## AUTH-002 · Şifre sıfırlama/değiştirme + e-posta değiştirme + Türkçe hata — todo
+## AUTH-002 · Şifre sıfırlama + deep link callback + e-posta değiştirme — **done**
+- Amaç: Şifremi unuttum + şifre sıfırlama; mobil deep link callback (e-posta
+  doğrulama + şifre sıfırlama) Android & iOS; e-posta değiştirme altyapısı; auth
+  hata/loading durumlarının tamamlanması.
+- Yapıldı: Merkezî callback URI'leri `AppConfig` (`loginCallbackUrl =
+  com.miyhav.app://login-callback/`, `resetPasswordCallbackUrl =
+  com.miyhav.app://reset-password/`). Repository: `sendPasswordReset`,
+  `updatePassword`, `updateEmail`, `authEvents()` (AuthEventKind); `signUp`/
+  `resend` artık `emailRedirectTo` ile deep link'i tetikler. `AuthRouterState`
+  (status + **passwordRecovery** modu) → GoRouter redirect: kurtarma modunda
+  yalnızca `/reset-password`. Ekranlar: `ForgotPasswordScreen`,
+  `ResetPasswordScreen` (yeni şifre ≥8 + tekrar + Türkçe validasyon; başarıda
+  oturum kapatılıp girişe döner — kurtarma oturumu normal giriş sanılmaz).
+  Login'e "Şifremi unuttum". Native: Android intent-filter (manifest) + iOS
+  CFBundleURLTypes (Info.plist). Deep link'i supabase_flutter (PKCE) işler;
+  tekrar işlenme idempotent (recovery guard + declarative redirect).
+  `PrimaryButton/SecondaryButton` uzun etiketlerde taşmayı önleyecek şekilde
+  sağlamlaştırıldı.
+- SQL/RLS etkisi: **yok** (yeni migration oluşturulmadı; profiles'a dokunulmadı).
+- Test yapıldı: `dart format` ✅ · `flutter analyze` (No issues) ✅ ·
+  `flutter test` → **43 test All passed** (kurtarma yönlendirmesi, yeni şifre
+  validasyon + güncelle/çıkış, şifremi unuttum gönderimi, login→forgot navigasyon,
+  callback URI'leri). Native deep link'in cihazda uçtan uca doğrulaması → OPS-004.
+- Manuel: Supabase Dashboard **Redirect URLs** (bkz. görev sonu notu).
 - Bağımlılık: AUTH-001.
+- Durum: **done** (native deep link cihaz doğrulaması OPS-004'te).
 
 ## PROFILE-001 · Profil görüntüleme/düzenleme + username uniqueness — todo
 - İçerik: profiles CRUD (kritik alanlar hariç), username_normalized unique, foto.
@@ -217,6 +241,14 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   AÇIK; (b) gerçek cihaz/emülatör veya CI'da `--dart-define-from-file=config/
   dev.local.json` ile uygulama çalıştırılıp gerçek e-posta ile kayıt/doğrulama/
   giriş/çıkış denenir; doğrulanmadan ana ekrana geçilemediği görülür.
+- **OPS-004 · Native deep link uçtan uca (AUTH-002):** Android intent-filter ve
+  iOS URL scheme (`com.miyhav.app://login-callback/`, `.../reset-password/`)
+  eklendi; ancak bu ortamda Android SDK/gerçek cihaz olmadığından e-posta
+  doğrulama ve şifre sıfırlama bağlantısının uygulamayı açması cihazda test
+  edilemedi (client mantığı + yönlendirme widget testleriyle doğrulandı).
+  **Nasıl kapatılır:** (a) Supabase Dashboard'da Redirect URL'ler eklenir; (b)
+  gerçek cihaz/emülatörde kayıt → doğrulama linki → uygulama açılır → ana ekran;
+  (c) şifre sıfırlama linki → yeni şifre ekranı açılır → güncelle → giriş.
 - **TD-001 · Android debug build (SETUP-001):** Bu geliştirme ortamında Android SDK
   yok ve `dl.google.com` organizasyon egress politikası ile engelli (403), bu yüzden
   `sdkmanager`/`build-tools` indirilemiyor ve gerçek `flutter build apk --debug`
@@ -228,5 +260,5 @@ ANDROID-001 → IOS-001 → RELEASE-001.
   ANDROID-001 görevinde veya ortam açıldığında kapatılacak.
 
 ## Sonraki Görev
-**AUTH-002** (şifre sıfırlama/değiştirme + e-posta değiştirme + Türkçe hata).
-Ayrı ve onaylı bir adımda başlanacak; AUTH-001 burada durur.
+**PROFILE-001** (profil görüntüleme/düzenleme + username uniqueness). Ayrı ve
+onaylı bir adımda başlanacak; AUTH-002 burada durur.

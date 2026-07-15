@@ -4,8 +4,8 @@ import 'package:miyhav/features/auth/data/auth_repository.dart';
 
 /// Testlerde Supabase'e bağlanmadan kullanılan sahte [AuthRepository].
 ///
-/// Başlangıç durumu verilir; [emit] ile durum değiştirilip router yönlendirmesi
-/// tetiklenebilir. Çağrılar kaydedilir.
+/// Başlangıç durumu verilir; [emit] ile durum, [emitEvent] ile auth olayı
+/// (ör. şifre kurtarma) tetiklenebilir. Çağrılar kaydedilir.
 class FakeAuthRepository implements AuthRepository {
   FakeAuthRepository(this._status, {String? email}) {
     _email = email;
@@ -13,18 +13,23 @@ class FakeAuthRepository implements AuthRepository {
 
   AuthStatus _status;
   String? _email;
-  final StreamController<AuthStatus> _controller =
+  final StreamController<AuthStatus> _statusController =
       StreamController<AuthStatus>.broadcast();
+  final StreamController<AuthEventKind> _eventController =
+      StreamController<AuthEventKind>.broadcast();
 
   final List<String> calls = <String>[];
   SignUpOutcome signUpOutcome = SignUpOutcome.verificationRequired;
   Object? throwOnSignIn;
+  Object? throwOnUpdatePassword;
 
   void emit(AuthStatus status, {String? email}) {
     _status = status;
     if (email != null) _email = email;
-    _controller.add(status);
+    _statusController.add(status);
   }
+
+  void emitEvent(AuthEventKind event) => _eventController.add(event);
 
   @override
   AuthStatus get currentStatus => _status;
@@ -33,7 +38,10 @@ class FakeAuthRepository implements AuthRepository {
   String? get currentEmail => _email;
 
   @override
-  Stream<AuthStatus> statusChanges() => _controller.stream;
+  Stream<AuthStatus> statusChanges() => _statusController.stream;
+
+  @override
+  Stream<AuthEventKind> authEvents() => _eventController.stream;
 
   @override
   Future<SignUpOutcome> signUp({
@@ -55,6 +63,7 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     calls.add('signOut');
+    emitEvent(AuthEventKind.signedOut);
     emit(AuthStatus.unauthenticated);
   }
 
@@ -63,5 +72,25 @@ class FakeAuthRepository implements AuthRepository {
     calls.add('resend:$email');
   }
 
-  void dispose() => _controller.close();
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    calls.add('sendPasswordReset:$email');
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    calls.add('updatePassword');
+    final Object? err = throwOnUpdatePassword;
+    if (err != null) throw err;
+  }
+
+  @override
+  Future<void> updateEmail(String newEmail) async {
+    calls.add('updateEmail:$newEmail');
+  }
+
+  void dispose() {
+    _statusController.close();
+    _eventController.close();
+  }
 }

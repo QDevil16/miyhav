@@ -63,4 +63,21 @@ class AppConfig {
   /// Supabase bağlantı bilgileri build sırasında sağlanmış mı?
   static bool get hasSupabaseConfig =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
+
+  // --- Mobil derin bağlantı (deep link) callback'leri ---
+  //
+  // Miyhav yalnızca Android + iOS'tur; web/localhost callback KULLANILMAZ.
+  // Bu URI'ler Supabase Auth `emailRedirectTo` / `redirectTo` değerleri olarak
+  // ve native intent-filter / URL scheme yapılandırmalarında kullanılır. Değer
+  // burada tek merkezden yönetilir (koda dağınık yazılmaz).
+
+  /// Uygulamanın kalıcı kimliğiyle aynı deep link şeması.
+  static const String deepLinkScheme = applicationId; // com.miyhav.app
+
+  /// E-posta doğrulama sonrası uygulamayı açan callback.
+  static const String loginCallbackUrl = '$deepLinkScheme://login-callback/';
+
+  /// Şifre sıfırlama bağlantısının uygulamayı açtığı callback.
+  static const String resetPasswordCallbackUrl =
+      '$deepLinkScheme://reset-password/';
 }

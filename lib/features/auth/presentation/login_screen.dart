@@ -106,7 +106,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           isLoading: _loading,
           onPressed: _loading ? null : _submit,
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.xs),
+        TextButton(
+          onPressed: _loading
+              ? null
+              : () => context.go(AppRoutes.forgotPassword),
+          child: const Text('Şifremi unuttum'),
+        ),
         TextButton(
           onPressed: _loading ? null : _goToVerify,
           child: const Text('E-postamı doğrulayacağım'),

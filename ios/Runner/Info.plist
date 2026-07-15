@@ -18,6 +18,22 @@
 	<string>Miyhav</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<!-- Supabase Auth deep link callback'leri (yalnızca mobil; web yok).
+	     com.miyhav.app://login-callback/ ve com.miyhav.app://reset-password/
+	     Şema AppConfig ile aynıdır (tek merkez). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.miyhav.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.miyhav.app</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>

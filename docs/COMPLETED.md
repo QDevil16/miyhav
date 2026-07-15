@@ -1,5 +1,36 @@
 # COMPLETED — Tamamlanan Görevler
 
+## AUTH-002 · Şifre sıfırlama + mobil deep link callback + e-posta değiştirme
+- **Tarih:** 2026-07-15
+- **Özet:** Şifremi unuttum → şifre sıfırlama akışı ve mobil deep link callback'leri
+  (e-posta doğrulama + şifre sıfırlama) Android & iOS için eklendi. Merkezî callback
+  URI'leri `AppConfig` (`loginCallbackUrl`, `resetPasswordCallbackUrl` =
+  `com.miyhav.app://login-callback/` ve `.../reset-password/`). `AuthRepository`
+  genişletildi: `sendPasswordReset`, `updatePassword`, `updateEmail`, `authEvents()`
+  (AuthEventKind — passwordRecovery dahil); `signUp`/`resend` artık `emailRedirectTo`
+  ile uygulamayı deep link'le açar. `AuthRouterState` (ChangeNotifier) oturum durumu
+  + **passwordRecovery** modunu izler; GoRouter redirect kurtarma modunda yalnızca
+  `/reset-password` gösterir (kurtarma oturumu normal giriş sanılmaz; şifre
+  güncellenince oturum kapatılır → girişe döner). Yeni ekranlar:
+  `ForgotPasswordScreen` (e-posta → bağlantı gönderildi durumu),
+  `ResetPasswordScreen` (yeni şifre ≥8 + tekrar + Türkçe validasyon, loading, Türkçe
+  başarı geri bildirimi). Login'e "Şifremi unuttum" bağlantısı. Native yapılandırma:
+  Android `AndroidManifest.xml` intent-filter (VIEW/BROWSABLE, scheme com.miyhav.app,
+  host login-callback + reset-password), iOS `Info.plist` CFBundleURLTypes. Deep
+  link'i supabase_flutter (PKCE) işler; tekrar işlenme idempotent. `PrimaryButton`/
+  `SecondaryButton` uzun etiket taşmasına karşı sağlamlaştırıldı. Ham hata yok →
+  Türkçe (`AuthErrorMapper`). Web/localhost/PWA/WebView eklenmedi; profiles
+  migration'ına dokunulmadı, yeni migration oluşturulmadı.
+- **Kararlar:** D-020 (mobil deep link auth callback).
+- **Test yapıldı:** `dart format` ✅ · `flutter analyze` → *No issues found* ✅ ·
+  `flutter test` → **43 test All passed** (passwordRecovery deep link yönlendirmesi,
+  yeni şifre validasyon + updatePassword/signOut, şifremi unuttum gönderimi,
+  login→forgot navigasyon, callback URI doğrulaması; mevcut auth/tema/config testleri).
+- **Test borcu:** OPS-004 — native deep link'in gerçek cihazda uçtan uca doğrulaması
+  (bu ortamda Android SDK/cihaz yok).
+- **Commit:** `feat: add password reset and mobile deep link auth callbacks`
+- **Durum:** done.
+
 ## DESIGN-002 · Pet türü görselleri: hazır ikon sistemine geçiş
 - **Tarih:** 2026-07-15
 - **Özet:** Elle çizilen pet görselleri (önce pixel-art, ardından denenen özgün

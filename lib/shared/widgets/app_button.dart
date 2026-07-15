@@ -44,11 +44,16 @@ class PrimaryButton extends StatelessWidget {
                 Icon(icon, size: 20, color: scheme.onPrimary),
                 const SizedBox(width: AppSpacing.xs),
               ],
-              Text(
-                label,
-                style: AppTypography.label.copyWith(
-                  color: scheme.onPrimary,
-                  fontSize: 16,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.label.copyWith(
+                    color: scheme.onPrimary,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ],
@@ -122,9 +127,14 @@ class SecondaryButton extends StatelessWidget {
                 Icon(icon, size: 20, color: fg),
                 const SizedBox(width: AppSpacing.xs),
               ],
-              Text(
-                label,
-                style: AppTypography.label.copyWith(color: fg, fontSize: 16),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.label.copyWith(color: fg, fontSize: 16),
+                ),
               ),
             ],
           ),

@@ -118,6 +118,18 @@ Gerekçe: "kullanıcı doğrulanmadan ana uygulamaya geçmesin" kuralını hem c
 yönlendirmesi hem sunucu ayarıyla iki katmanlı güvence altına almak. Ham Supabase
 hataları `AuthErrorMapper` ile merkezî Türkçe mesaja çevrilir (kural 6).
 
+## D-020 · Mobil deep link auth callback (AUTH-002)
+E-posta doğrulama ve şifre sıfırlama, mobil özel şema deep link'i ile döner
+(`com.miyhav.app://login-callback/`, `com.miyhav.app://reset-password/`).
+localhost/web/PWA/WebView KULLANILMAZ (Miyhav web değildir). URI'ler `AppConfig`'te
+tek merkezden; Supabase `emailRedirectTo`/`redirectTo` bunları kullanır. Native:
+Android `intent-filter` (manifest), iOS `CFBundleURLTypes` (Info.plist). Gelen
+link'i supabase_flutter (PKCE) işler. Şifre kurtarma oturumu `AuthRouterState` ile
+ayrı izlenir ve normal giriş sanılmaz: kurtarma modunda yalnızca yeni şifre ekranı
+gösterilir, şifre güncellenince oturum kapatılır. Tekrar işlenme (duplicate deep
+link) idempotenttir (recovery guard + declarative GoRouter redirect). Gerekçe:
+şartname mobil-only; güvenli, öngörülebilir ve platformlar arası tutarlı callback.
+
 ## Retention notu
 Şikâyet/moderasyon (reports, content_reports) verisi hesap silmede tamamen
 silinmeyebilir (kötüye kullanım önleme). Kesin retention politikası ilgili
